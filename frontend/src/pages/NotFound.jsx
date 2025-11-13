@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 
-
 const NotFound = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
