@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
 
 const Signup = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
@@ -62,8 +65,8 @@ const Signup = () => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
 
-        // Redirect to home or dashboard
-        navigate('/');
+        // Redirect to profile/dashboard
+        navigate('/signin');
       }
     } catch (err) {
       setError(
@@ -75,11 +78,13 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 via-slate-900 to-black px-4">
-      <div className="max-w-md w-full space-y-8">
+    <>
+      <Navbar />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-slate-900 to-black px-4">
+        <div className="max-w-md w-full space-y-8">
         <div className="text-center ">
-          <h2 className="text-4xl font-bold text-white mb-2">Create Account</h2>
-          <p className="text-slate-300">Join our music streaming community</p>
+          <h2 className="text-4xl font-bold text-white mb-2">{t('auth.signup.title')}</h2>
+          <p className="text-slate-300">{t('auth.signup.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6 bg-slate-900/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-slate-700/50">
@@ -92,7 +97,7 @@ const Signup = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-slate-200 mb-2">
-                Username
+                {t('auth.signup.username')}
               </label>
               <input
                 id="username"
@@ -101,13 +106,13 @@ const Signup = () => {
                 value={username}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder="Choose a username"
+                placeholder={t('auth.signup.usernamePlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
-                Email Address
+                {t('auth.signup.email')}
               </label>
               <input
                 id="email"
@@ -116,13 +121,13 @@ const Signup = () => {
                 value={email}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder="your@email.com"
+                placeholder={t('auth.signup.emailPlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
-                Password
+                {t('auth.signup.password')}
               </label>
               <input
                 id="password"
@@ -131,13 +136,13 @@ const Signup = () => {
                 value={password}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder="Create a password"
+                placeholder={t('auth.signup.passwordPlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-200 mb-2">
-                Confirm Password
+                {t('auth.signup.confirmPassword')}
               </label>
               <input
                 id="confirmPassword"
@@ -146,28 +151,38 @@ const Signup = () => {
                 value={confirmPassword}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder="Confirm your password"
+                placeholder={t('auth.signup.confirmPasswordPlaceholder')}
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-600 hover:to-blue-800 text-white font-semibold rounded-lg shadow-lg transform transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            {loading ? 'Creating Account...' : 'Sign Up'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-600 hover:to-blue-800 text-white font-semibold rounded-lg shadow-lg transform transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {loading ? t('auth.signup.loading') : t('auth.signup.button')}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg shadow-lg transform transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+            >
+              {t('auth.signup.cancel')}
+            </button>
+          </div>
 
           <div className="text-center text-slate-300 text-sm">
-            Already have an account?{' '}
+            {t('auth.signup.haveAccount')}{' '}
             <Link to="/signin" className="text-blue-400 hover:text-blue-300 font-medium transition">
-              Sign In
+              {t('auth.signup.signin')}
             </Link>
           </div>
         </form>
       </div>
     </div>
+    </>
   );
 };
 
