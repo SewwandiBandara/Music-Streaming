@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
+
 
 const Signin = () => {
   const { t } = useTranslation();
@@ -69,7 +69,6 @@ const Signin = () => {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-slate-900 to-black px-4">
         <div className="max-w-md w-full space-y-8">
         <div className="text-center">

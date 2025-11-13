@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
+
 const Home = () => {
   const { t } = useTranslation();
 
@@ -51,10 +52,10 @@ const Home = () => {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
-              {t('home.features.unlimited.title')}
+              Unlimited Music
             </h3>
             <p className="text-gray-600 text-center">
-              {t('home.features.unlimited.description')}
+              Stream millions of songs from artists around the world.
             </p>
           </div>
 
@@ -66,10 +67,10 @@ const Home = () => {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
-              {t('home.features.playlists.title')}
+              Custom Playlists
             </h3>
             <p className="text-gray-600 text-center">
-              {t('home.features.playlists.description')}
+              Create and share your own playlists with friends.
             </p>
           </div>
 
@@ -80,26 +81,26 @@ const Home = () => {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
-              {t('home.features.personalized.title')}
+              Personalized
             </h3>
             <p className="text-gray-600 text-center">
-              {t('home.features.personalized.description')}
+              Get recommendations based on your listening history.
             </p>
           </div>
         </div>
 
         <div className="mt-16 text-center">
           <Link to="/profile" className="px-8 py-4 bg-blue-900 text-white font-semibold rounded-full text-lg hover:bg-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg inline-block">
-            {t('home.cta.button')}
+            Start Listening Now
           </Link>
         </div>
 
         {/* Trending Songs Section */}
         <div className="mt-24">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-blue-900">🔥 {t('home.trending.title')}</h2>
+            <h2 className="text-3xl font-bold text-blue-900">🔥 Trending Songs</h2>
             <Link to="/browse" className="text-blue-900 font-semibold hover:text-blue-700">
-              {t('home.trending.viewAll')} →
+              View All →
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -121,9 +122,9 @@ const Home = () => {
         {/* Popular Artists Section */}
         <div className="mt-24">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-blue-900">⭐ {t('home.popular.title')}</h2>
+            <h2 className="text-3xl font-bold text-blue-900">⭐ Popular Artists</h2>
             <Link to="/browse" className="text-blue-900 font-semibold hover:text-blue-700">
-              {t('home.popular.viewAll')} →
+              View All →
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -132,7 +133,7 @@ const Home = () => {
                 <div className="w-full aspect-square bg-gradient-to-br from-blue-600 to-blue-900 rounded-full mb-3 cursor-pointer hover:scale-105 transition-transform shadow-lg"></div>
                 <h3 className="font-semibold text-gray-900 mb-1 truncate">{artist.name}</h3>
                 <p className="text-sm text-gray-600">{artist.genre}</p>
-                <p className="text-xs text-blue-600 font-medium">{artist.followers} {t('home.popular.followers')}</p>
+                <p className="text-xs text-blue-600 font-medium">{artist.followers} followers</p>
               </div>
             ))}
           </div>
@@ -140,16 +141,16 @@ const Home = () => {
 
         {/* CTA Section */}
         <div className="mt-24 mb-12 bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl shadow-lg p-12 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">{t('home.cta.title')}</h2>
+          <h2 className="text-4xl font-bold mb-4">Ready to Start Your Musical Journey?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            {t('home.cta.subtitle')}
+            Join millions of music lovers and discover your next favorite song today.
           </p>
           <div className="flex gap-4 justify-center">
             <Link to="/signup" className="px-8 py-4 bg-white text-blue-900 font-semibold rounded-full text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-200 shadow-lg">
-              {t('home.cta.signupFree')}
+              Sign Up Free
             </Link>
             <Link to="/browse" className="px-8 py-4 bg-blue-800 text-white font-semibold rounded-full text-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg border-2 border-white">
-              {t('home.cta.browseMusic')}
+              Browse Music
             </Link>
           </div>
         </div>
