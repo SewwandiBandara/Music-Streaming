@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
 
 const Signup = () => {
   const { t } = useTranslation();
