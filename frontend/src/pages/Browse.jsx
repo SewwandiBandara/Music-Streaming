@@ -1,19 +1,19 @@
 const Browse = () => {
   const genres = [
-    { name: 'Pop', color: 'bg-pink-500', icon: '🎤' },
-    { name: 'Rock', color: 'bg-red-500', icon: '🎸' },
-    { name: 'Hip Hop', color: 'bg-yellow-500', icon: '🎧' },
-    { name: 'Electronic', color: 'bg-blue-500', icon: '🎹' },
-    { name: 'Jazz', color: 'bg-purple-500', icon: '🎺' },
-    { name: 'Classical', color: 'bg-indigo-500', icon: '🎻' },
-    { name: 'Country', color: 'bg-amber-500', icon: '🤠' },
-    { name: 'R&B', color: 'bg-rose-500', icon: '🎵' },
+    { name: 'Pop', color: 'bg-blue-600', icon: '🎤' },
+    { name: 'Rock', color: 'bg-gray-800', icon: '🎸' },
+    { name: 'Hip Hop', color: 'bg-blue-800', icon: '🎧' },
+    { name: 'Electronic', color: 'bg-blue-700', icon: '🎹' },
+    { name: 'Jazz', color: 'bg-blue-900', icon: '🎺' },
+    { name: 'Classical', color: 'bg-gray-700', icon: '🎻' },
+    { name: 'Country', color: 'bg-blue-500', icon: '🤠' },
+    { name: 'R&B', color: 'bg-gray-900', icon: '🎵' },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-purple-900 mb-8">Browse by Genre</h1>
+        <h1 className="text-4xl font-bold text-blue-900 mb-8">Browse by Genre</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {genres.map((genre) => (
@@ -31,11 +31,11 @@ const Browse = () => {
         </div>
 
         <div className="mt-16">
-          <h2 className="text-3xl font-bold text-purple-900 mb-6">Popular Now</h2>
+          <h2 className="text-3xl font-bold text-blue-900 mb-6">Popular Now</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow duration-200">
-                <div className="w-full aspect-square bg-gradient-to-br from-purple-400 to-indigo-400 rounded-lg mb-4"></div>
+              <div key={i} className="bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow duration-200 border border-gray-200">
+                <div className="w-full aspect-square bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg mb-4"></div>
                 <h3 className="font-semibold text-gray-900 mb-1">Song Title {i}</h3>
                 <p className="text-sm text-gray-600">Artist Name</p>
               </div>
