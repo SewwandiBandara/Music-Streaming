@@ -1,19 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+
+    if (token && userData) {
+      setIsLoggedIn(true);
+      setUser(JSON.parse(userData));
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
+    }
+  }, [location]);
 
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/browse', label: 'Browse' },
-    { path: '/library', label: 'Library' },
-    { path: '/playlists', label: 'Playlists' },
+    { path: '/', label: t('navbar.home') },
+    { path: '/browse', label: t('navbar.browse') },
+    { path: '/library', label: t('navbar.library') },
+    { path: '/playlists', label: t('navbar.playlists') },
   ];
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -88,14 +110,49 @@ const Navbar = () => {
             </form>
           </div>
 
+          {/* Language Selector */}
+          <div className="hidden md:flex items-center space-x-2">
+            <select
+              value={i18n.language}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+            >
+              <option value="en">English</option>
+              <option value="si">සිංහල</option>
+              <option value="ta">தமிழ்</option>
+            </select>
+          </div>
+
           {/* User Actions */}
           <div className="hidden md:flex items-center space-x-3">
-            <button className="px-4 py-2 rounded-full font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200">
-              Log In
-            </button>
-            <button className="px-6 py-2 rounded-full font-semibold bg-white text-blue-900 hover:bg-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-              Sign Up
-            </button>
+            {isLoggedIn ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-full font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                  <span>{user?.username}</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/signin"
+                  className="px-4 py-2 rounded-full font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
+                >
+                  {t('navbar.login')}
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-6 py-2 rounded-full font-semibold bg-white text-blue-900 hover:bg-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                >
+                  {t('navbar.signup')}
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -178,12 +235,48 @@ const Navbar = () => {
 
             {/* Mobile User Actions */}
             <div className="pt-3 space-y-2 border-t border-gray-700">
-              <button className="w-full px-4 py-2 rounded-lg font-medium text-gray-200 hover:bg-gray-800 hover:text-white transition-all duration-200">
-                Log In
-              </button>
-              <button className="w-full px-4 py-2 rounded-lg font-semibold bg-white text-blue-900 hover:bg-gray-100 transition-all duration-200">
-                Sign Up
-              </button>
+              {/* Mobile Language Selector */}
+              <div className="px-4 py-2">
+                <select
+                  value={i18n.language}
+                  onChange={(e) => changeLanguage(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="en">English</option>
+                  <option value="si">සිංහල</option>
+                  <option value="ta">தமிழ்</option>
+                </select>
+              </div>
+
+              {isLoggedIn ? (
+                <Link
+                  to="/profile"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full px-4 py-2 rounded-lg font-medium text-gray-200 hover:bg-gray-800 hover:text-white transition-all duration-200 flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                  <span>{user?.username}</span>
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/signin"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full px-4 py-2 rounded-lg font-medium text-gray-200 hover:bg-gray-800 hover:text-white transition-all duration-200 block"
+                  >
+                    {t('navbar.login')}
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-full px-4 py-2 rounded-lg font-semibold bg-white text-blue-900 hover:bg-gray-100 transition-all duration-200 block"
+                  >
+                    {t('navbar.signup')}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
