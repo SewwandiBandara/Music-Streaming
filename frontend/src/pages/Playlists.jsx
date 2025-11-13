@@ -1,11 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import Navbar from '../components/Navbar';
 
 const Playlists = () => {
   const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
-      <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-blue-900">{t('playlists.title')}</h1>
