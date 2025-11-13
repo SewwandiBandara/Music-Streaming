@@ -7,6 +7,9 @@ import Home from './pages/Home';
 import Browse from './pages/Browse';
 import Library from './pages/Library';
 import Playlists from './pages/Playlists';
+import NotFound from './pages/NotFound';
+import Signin from './pages/Signin';
+import Signup from './pages/Signup';
 
 function App() {
   const [currentSong, setCurrentSong] = useState(null);
@@ -48,6 +51,9 @@ function App() {
             <Route path="/browse" element={<Browse onPlaySong={handlePlaySong} />} />
             <Route path="/library" element={<Library onPlaySong={handlePlaySong} />} />
             <Route path="/playlists" element={<Playlists onPlaySong={handlePlaySong} />} />
+            <Route path="*" element={<NotFound />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/signin" element={<Signin />} />
           </Routes>
           <AudioPlayer
             currentSong={currentSong}

@@ -27,10 +27,10 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { path: '/', label: t('navbar.home') },
-    { path: '/browse', label: t('navbar.browse') },
-    { path: '/library', label: t('navbar.library') },
-    { path: '/playlists', label: t('navbar.playlists') },
+    { path: '/', label: t('Home') },
+    { path: '/browse', label: t('Browse') },
+    { path: '/library', label: t('Library') },
+    { path: '/playlists', label: t('Playlists') },
   ];
 
   const changeLanguage = (lng) => {
@@ -143,13 +143,13 @@ const Navbar = () => {
                   to="/signin"
                   className="px-4 py-2 rounded-full font-medium text-gray-200 hover:text-white hover:bg-gray-800 transition-all duration-200"
                 >
-                  {t('navbar.login')}
+                  {t('Login')}
                 </Link>
                 <Link
                   to="/signup"
                   className="px-6 py-2 rounded-full font-semibold bg-white text-blue-900 hover:bg-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                 >
-                  {t('navbar.signup')}
+                  {t('Signup')}
                 </Link>
               </>
             )}
