@@ -77,9 +77,7 @@ const Signup = () => {
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-slate-900 to-black px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-slate-900 to-black px-4">
         <div className="max-w-md w-full space-y-8">
         <div className="text-center ">
           <h2 className="text-4xl font-bold text-white mb-2">{t('auth.signup.title')}</h2>
@@ -181,7 +179,6 @@ const Signup = () => {
         </form>
       </div>
     </div>
-    </>
   );
 };
 
