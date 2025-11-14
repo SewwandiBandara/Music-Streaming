@@ -110,20 +110,20 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-gradient-to-r from-blue-900 to-blue-700 shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-              <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full">
+              <span className="px-3 py-1 bg-blue-800 text-white text-sm rounded-full">
                 {admin?.email}
               </span>
             </div>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+              className="px-6 py-3 bg-white text-blue-900 font-semibold rounded-full hover:bg-gray-100 transform hover:scale-105 transition-all duration-200 shadow-lg"
             >
               Logout
             </button>
@@ -132,7 +132,7 @@ const AdminDashboard = () => {
       </header>
 
       {/* Navigation Tabs */}
-      <div className="bg-gray-800 border-b border-gray-700">
+      <div className="bg-white shadow-md border-b border-gray-200">
         <div className="container mx-auto px-4">
           <nav className="flex space-x-8">
             {['overview', 'users', 'songs', 'artists'].map((tab) => (
@@ -141,8 +141,8 @@ const AdminDashboard = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`py-4 px-2 border-b-2 font-medium text-sm transition ${
                   activeTab === tab
-                    ? 'border-purple-500 text-white'
-                    : 'border-transparent text-gray-400 hover:text-white'
+                    ? 'border-blue-700 text-blue-900'
+                    : 'border-transparent text-gray-600 hover:text-blue-700'
                 }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {error && (
-          <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-900/20 border border-red-400 text-red-600 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
@@ -165,11 +165,11 @@ const AdminDashboard = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Total Users</p>
-                    <p className="text-3xl font-bold text-white mt-2">{stats.totalUsers}</p>
+                    <p className="text-sm text-gray-600 mb-1">Total Users</p>
+                    <p className="text-3xl font-bold text-blue-900">{stats.totalUsers}</p>
                   </div>
                   <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,11 +179,11 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Total Songs</p>
-                    <p className="text-3xl font-bold text-white mt-2">{stats.totalSongs}</p>
+                    <p className="text-sm text-gray-600 mb-1">Total Songs</p>
+                    <p className="text-3xl font-bold text-blue-800">{stats.totalSongs}</p>
                   </div>
                   <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,13 +193,13 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Total Artists</p>
-                    <p className="text-3xl font-bold text-white mt-2">{stats.totalArtists}</p>
+                    <p className="text-sm text-gray-600 mb-1">Total Artists</p>
+                    <p className="text-3xl font-bold text-blue-700">{stats.totalArtists}</p>
                   </div>
-                  <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-blue-700 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -207,11 +207,11 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Total Plays</p>
-                    <p className="text-3xl font-bold text-white mt-2">{stats.totalPlays}</p>
+                    <p className="text-sm text-gray-600 mb-1">Total Plays</p>
+                    <p className="text-3xl font-bold text-blue-600">{stats.totalPlays}</p>
                   </div>
                   <div className="w-12 h-12 bg-pink-600 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,32 +227,32 @@ const AdminDashboard = () => {
 
         {/* Users Tab */}
         {activeTab === 'users' && (
-          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-700">
-              <h2 className="text-xl font-semibold text-white">Users Management</h2>
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+              <h2 className="text-xl font-semibold text-blue-900">Users Management</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-750">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Username</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Joined</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Username</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Joined</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-200">
                   {users.map((user) => (
-                    <tr key={user._id} className="hover:bg-gray-750">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{user.username}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.email}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <tr key={user._id} className="hover:bg-blue-50 transition">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{user.username}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => handleDeleteUser(user._id)}
-                          className="text-red-500 hover:text-red-400 transition"
+                          className="text-red-600 hover:text-red-800 font-medium transition"
                         >
                           Delete
                         </button>
@@ -267,38 +267,38 @@ const AdminDashboard = () => {
 
         {/* Songs Tab */}
         {activeTab === 'songs' && (
-          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-700">
-              <h2 className="text-xl font-semibold text-white">Songs Management</h2>
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+              <h2 className="text-xl font-semibold text-blue-900">Songs Management</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-750">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Artist</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Plays</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Added</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Title</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Artist</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Plays</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Added</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-200">
                   {songs.map((song) => (
-                    <tr key={song._id} className="hover:bg-gray-750">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{song.title}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <tr key={song._id} className="hover:bg-blue-50 transition">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{song.title}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {song.artist?.name || 'Unknown'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {song.playCount || 0}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {new Date(song.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => handleDeleteSong(song._id)}
-                          className="text-red-500 hover:text-red-400 transition"
+                          className="text-red-600 hover:text-red-800 font-medium transition"
                         >
                           Delete
                         </button>
@@ -313,38 +313,38 @@ const AdminDashboard = () => {
 
         {/* Artists Tab */}
         {activeTab === 'artists' && (
-          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-700">
-              <h2 className="text-xl font-semibold text-white">Artists Management</h2>
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
+              <h2 className="text-xl font-semibold text-blue-900">Artists Management</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-750">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Bio</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Bio</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700">
+                <tbody className="divide-y divide-gray-200">
                   {artists.map((artist) => (
-                    <tr key={artist._id} className="hover:bg-gray-750">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{artist.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-300 max-w-xs truncate">
+                    <tr key={artist._id} className="hover:bg-blue-50 transition">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{artist.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
                         {artist.bio || 'No bio'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {artist.isVerified ? (
                           <span className="px-2 py-1 bg-green-600 text-white text-xs rounded-full">Verified</span>
                         ) : (
-                          <span className="px-2 py-1 bg-gray-600 text-white text-xs rounded-full">Not Verified</span>
+                          <span className="px-2 py-1 bg-gray-400 text-white text-xs rounded-full">Not Verified</span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => handleVerifyArtist(artist._id)}
-                          className="text-purple-500 hover:text-purple-400 transition"
+                          className="text-blue-700 hover:text-blue-900 font-medium transition"
                         >
                           {artist.isVerified ? 'Unverify' : 'Verify'}
                         </button>
