@@ -31,6 +31,7 @@ const Navbar = () => {
     { path: '/browse', label: t('Browse') },
     { path: '/library', label: t('Library') },
     { path: '/playlists', label: t('Playlists') },
+    { path: '/admin', label: 'Admin' },
   ];
 
   const changeLanguage = (lng) => {
