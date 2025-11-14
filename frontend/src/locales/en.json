@@ -1,143 +1,97 @@
 {
-  "navbar": {
-    "home": "Home",
-    "browse": "Browse",
-    "library": "Library",
-    "playlists": "Playlists",
-    "profile": "Profile",
-    "login": "Login",
-    "signup": "Sign Up",
-    "logout": "Logout"
-  },
-  "home": {
-    "welcome": "Welcome to M-Tunes",
-    "subtitle": "Discover, stream, and enjoy millions of songs from your favorite artists.",
-    "features": {
-      "unlimited": {
-        "title": "Unlimited Music",
-        "description": "Stream millions of songs from artists around the world."
-      },
-      "playlists": {
-        "title": "Custom Playlists",
-        "description": "Create and share your own playlists with friends."
-      },
-      "personalized": {
-        "title": "Personalized",
-        "description": "Get recommendations based on your listening history."
-      }
-    },
-    "cta": {
-      "button": "Start Listening Now",
-      "title": "Ready to Start Your Musical Journey?",
-      "subtitle": "Join millions of music lovers and discover your next favorite song today.",
-      "signupFree": "Sign Up Free",
-      "browseMusic": "Browse Music"
-    },
-    "trending": {
-      "title": "Trending Songs",
-      "viewAll": "View All"
-    },
-    "popular": {
-      "title": "Popular Artists",
-      "viewAll": "View All",
-      "followers": "followers"
-    }
-  },
-  "profile": {
-    "title": "My Profile",
-    "myContent": "My Content",
-    "discoverMusic": "Discover Music",
-    "stats": {
-      "likedSongs": "Liked Songs",
-      "myPlaylists": "My Playlists",
-      "savedAlbums": "Saved Albums",
-      "following": "Following"
-    },
-    "tabs": {
-      "favorites": "Favorites",
-      "playlists": "Playlists",
-      "saved": "Saved",
-      "albums": "Albums",
-      "allSongs": "All Songs",
-      "allAlbums": "All Albums",
-      "allPlaylists": "All Playlists",
-      "allArtists": "All Artists"
-    },
-    "search": "Search songs, albums, artists...",
-    "emptyState": {
-      "title": "Nothing here yet",
-      "description": "Start exploring music and build your collection!",
-      "button": "Discover Music"
-    },
-    "songs": "songs"
-  },
-  "library": {
-    "title": "Library",
-    "empty": {
-      "title": "Library is empty",
-      "description": "Start adding songs, albums, and playlists to build your personal collection.",
-      "button": "Browse Music"
-    },
-    "stats": {
-      "likedSongs": "Liked Songs",
-      "playlists": "Playlists",
-      "albums": "Albums"
-    }
-  },
-  "playlists": {
-    "title": "Playlists",
-    "createPlaylist": "Create Playlist",
-    "empty": {
-      "title": "No playlists yet",
-      "description": "Create your first playlist and start organizing your favorite music."
-    },
-    "recommended": "Recommended Playlists",
-    "songs": "songs"
-  },
-  "browse": {
-    "title": "Browse Music",
-    "search": "Search for songs, artists, albums...",
-    "categories": "Categories",
-    "newReleases": "New Releases"
-  },
-  "auth": {
-    "signup": {
-      "title": "Create Account",
-      "subtitle": "Join our music streaming community",
-      "username": "Username",
-      "email": "Email Address",
-      "password": "Password",
-      "confirmPassword": "Confirm Password",
-      "usernamePlaceholder": "Choose a username",
-      "emailPlaceholder": "your@email.com",
-      "passwordPlaceholder": "Create a password",
-      "confirmPasswordPlaceholder": "Confirm your password",
-      "button": "Sign Up",
-      "loading": "Creating Account...",
-      "cancel": "Cancel",
-      "haveAccount": "Already have an account?",
-      "signin": "Sign In"
-    },
-    "signin": {
-      "title": "Welcome Back",
-      "subtitle": "Sign in to continue listening",
-      "email": "Email Address",
-      "password": "Password",
-      "emailPlaceholder": "your@email.com",
-      "passwordPlaceholder": "Enter your password",
-      "button": "Sign In",
-      "loading": "Signing In...",
-      "cancel": "Cancel",
-      "noAccount": "Don't have an account?",
-      "signup": "Sign Up"
-    }
-  },
-  "notFound": {
-    "title": "Page Not Found",
-    "description": "Sorry, we couldn't find the page you're looking for.",
-    "home": "Go Home",
-    "browse": "Browse Music",
-    "library": "My Library",
-    "playlists": "Playlists"
-  }
+  "navbarHome": "Home",
+  "navbarBrowse": "Browse",
+  "navbarLibrary": "Library",
+  "navbarPlaylists": "Playlists",
+  "navbarProfile": "Profile",
+  "navbarLogin": "Login",
+  "navbarSignup": "Sign Up",
+  "navbarLogout": "Logout",
+  "homeWelcome": "Welcome to M-Tunes",
+  "homeSubtitle": "Discover, stream, and enjoy millions of songs from your favorite artists.",
+  "homeFeaturesUnlimitedTitle": "Unlimited Music",
+  "homeFeaturesUnlimitedDescription": "Stream millions of songs from artists around the world.",
+  "homeFeaturesPlaylistsTitle": "Custom Playlists",
+  "homeFeaturesPlaylistsDescription": "Create and share your own playlists with friends.",
+  "homeFeaturesPersonalizedTitle": "Personalized",
+  "homeFeaturesPersonalizedDescription": "Get recommendations based on your listening history.",
+  "homeCtaButton": "Start Listening Now",
+  "homeCtaTitle": "Ready to Start Your Musical Journey?",
+  "homeCtaSubtitle": "Join millions of music lovers and discover your next favorite song today.",
+  "homeCtaSignupFree": "Sign Up Free",
+  "homeCtaBrowseMusic": "Browse Music",
+  "homeTrendingTitle": "Trending Songs",
+  "homeTrendingViewAll": "View All",
+  "homePopularTitle": "Popular Artists",
+  "homePopularViewAll": "View All",
+  "homePopularFollowers": "followers",
+  "profileTitle": "My Profile",
+  "profileMyContent": "My Content",
+  "profileDiscoverMusic": "Discover Music",
+  "profileStatsLikedSongs": "Liked Songs",
+  "profileStatsMyPlaylists": "My Playlists",
+  "profileStatsSavedAlbums": "Saved Albums",
+  "profileStatsFollowing": "Following",
+  "profileTabsFavorites": "Favorites",
+  "profileTabsPlaylists": "Playlists",
+  "profileTabsSaved": "Saved",
+  "profileTabsAlbums": "Albums",
+  "profileTabsAllSongs": "All Songs",
+  "profileTabsAllAlbums": "All Albums",
+  "profileTabsAllPlaylists": "All Playlists",
+  "profileTabsAllArtists": "All Artists",
+  "profileSearch": "Search songs, albums, artists...",
+  "profileEmptyStateTitle": "Nothing here yet",
+  "profileEmptyStateDescription": "Start exploring music and build your collection!",
+  "profileEmptyStateButton": "Discover Music",
+  "profileSongs": "songs",
+  "libraryTitle": "Library",
+  "libraryEmptyTitle": "Library is empty",
+  "libraryEmptyDescription": "Start adding songs, albums, and playlists to build your personal collection.",
+  "libraryEmptyButton": "Browse Music",
+  "libraryStatsLikedSongs": "Liked Songs",
+  "libraryStatsPlaylists": "Playlists",
+  "libraryStatsAlbums": "Albums",
+  "playlistsTitle": "Playlists",
+  "playlistsCreatePlaylist": "Create Playlist",
+  "playlistsEmptyTitle": "No playlists yet",
+  "playlistsEmptyDescription": "Create your first playlist and start organizing your favorite music.",
+  "playlistsRecommended": "Recommended Playlists",
+  "playlistsSongs": "songs",
+  "browseTitle": "Browse Music",
+  "browseSearch": "Search for songs, artists, albums...",
+  "browseCategories": "Categories",
+  "browseNewReleases": "New Releases",
+  "authSignupTitle": "Create Account",
+  "authSignupSubtitle": "Join our music streaming community",
+  "authSignupUsername": "Username",
+  "authSignupEmail": "Email Address",
+  "authSignupPassword": "Password",
+  "authSignupConfirmPassword": "Confirm Password",
+  "authSignupUsernamePlaceholder": "Choose a username",
+  "authSignupEmailPlaceholder": "your@email.com",
+  "authSignupPasswordPlaceholder": "Create a password",
+  "authSignupConfirmPasswordPlaceholder": "Confirm your password",
+  "authSignupButton": "Sign Up",
+  "authSignupLoading": "Creating Account...",
+  "authSignupCancel": "Cancel",
+  "authSignupHaveAccount": "Already have an account?",
+  "authSignupSignin": "Sign In",
+  "authSigninTitle": "Welcome Back",
+  "authSigninSubtitle": "Sign in to continue listening",
+  "authSigninEmail": "Email Address",
+  "authSigninPassword": "Password",
+  "authSigninEmailPlaceholder": "your@email.com",
+  "authSigninPasswordPlaceholder": "Enter your password",
+  "authSigninButton": "Sign In",
+  "authSigninLoading": "Signing In...",
+  "authSigninCancel": "Cancel",
+  "authSigninNoAccount": "Don't have an account?",
+  "authSigninSignup": "Sign Up",
+  "notFoundTitle": "Page Not Found",
+  "notFoundDescription": "Sorry, we couldn't find the page you're looking for.",
+  "notFoundHome": "Go Home",
+  "notFoundBrowse": "Browse Music",
+  "notFoundLibrary": "My Library",
+  "notFoundPlaylists": "Playlists"
 }

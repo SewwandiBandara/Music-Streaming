@@ -6,7 +6,7 @@ const Playlists = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-900">{t('playlists.title')}</h1>
+          <h1 className="text-4xl font-bold text-blue-900">{t('playlistsTitle')}</h1>
           {/* <button className="px-6 py-3 bg-blue-900 text-white font-semibold rounded-full hover:bg-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg">
             {t('playlists.createPlaylist')}
           </button> */}
@@ -18,15 +18,15 @@ const Playlists = () => {
               <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
               <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
             </svg>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">{t('playlists.empty.title')}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">{t('playlistsEmptyTitle')}</h2>
             <p className="text-gray-600 mb-6 text-center max-w-md">
-              {t('playlists.empty.description')}
+              {t('playlistsEmptyDescription')}
             </p>
           </div>
         </div>
 
         <div className="mt-12">
-          <h2 className="text-2xl font-bold text-blue-900 mb-6">{t('playlists.recommended')}</h2>
+          <h2 className="text-2xl font-bold text-blue-900 mb-6">{t('playlistsRecommended')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { name: 'Chill Vibes', color: 'from-blue-800 to-blue-900' },
@@ -41,7 +41,7 @@ const Playlists = () => {
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-1">{playlist.name}</h3>
-                <p className="text-sm text-gray-600">50 {t('playlists.songs')}</p>
+                <p className="text-sm text-gray-600">50 {t('playlistsSongs')}</p>
               </div>
             ))}
           </div>
