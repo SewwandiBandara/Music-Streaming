@@ -49,6 +49,34 @@ const playlistSchema = new mongoose.Schema({
     type: Number, // in seconds
     default: 0
   },
+  // Analytics
+  playCount: {
+    type: Number,
+    default: 0
+  },
+  likes: {
+    type: Number,
+    default: 0
+  },
+  shares: {
+    type: Number,
+    default: 0
+  },
+  // Privacy settings
+  privacySettings: {
+    isPublic: {
+      type: Boolean,
+      default: true
+    },
+    allowDownload: {
+      type: Boolean,
+      default: false
+    },
+    allowComments: {
+      type: Boolean,
+      default: true
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now

@@ -1,11 +1,54 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
 const User = require('../models/User');
 const Song = require('../models/Song');
 const Artist = require('../models/Artist');
 const Playlist = require('../models/Playlist');
 
 const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'audioFile') {
+      cb(null, path.join(__dirname, '../uploads/songs'));
+    } else if (file.fieldname === 'coverImage') {
+      cb(null, path.join(__dirname, '../uploads/covers'));
+    } else if (file.fieldname === 'artistImage') {
+      cb(null, path.join(__dirname, '../uploads/artists'));
+    }
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === 'audioFile') {
+      if (file.mimetype.startsWith('audio/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only audio files are allowed for song upload'));
+      }
+    } else if (file.fieldname === 'coverImage' || file.fieldname === 'artistImage') {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'));
+      }
+    } else {
+      cb(null, true);
+    }
+  }
+});
 
 // Hardcoded admin credentials
 const ADMIN_EMAIL = 'Admin@gmail.com';
@@ -398,7 +441,6 @@ router.get('/songs', adminAuth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const songs = await Song.find({ isActive: true })
-      .select('title artist album duration playCount createdAt')
       .populate('artist', 'name')
       .populate('album', 'title')
       .sort({ createdAt: -1 })
@@ -429,7 +471,6 @@ router.get('/artists', adminAuth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const artists = await Artist.find()
-      .select('name bio isVerified createdAt')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

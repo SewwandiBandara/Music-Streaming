@@ -54,10 +54,10 @@ const Signin = () => {
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
       // Redirect to home/dashboard
-      navigate('/');
+      navigate('/profile');
     } catch (err) {
       setError(
-        err.response?.data?.message || 'Login failed. Please try again.'
+        err.response?.data?.error || err.response?.data?.message || 'Login failed. Please try again.'
       );
     } finally {
       setLoading(false);
