@@ -57,6 +57,45 @@ const Home = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleDownload = (song) => {
+    const link = document.createElement('a');
+    link.href = `http://localhost:5000${song.fileUrl}`;
+    link.download = `${song.title} - ${song.artist?.name || 'Unknown'}.${song.format || 'mp3'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleAddToFavorites = async (songId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login to add songs to favorites');
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:5000/api/songs/${songId}/like`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Song added to favorites!');
+    } catch (error) {
+      console.error('Error adding to favorites:', error);
+      alert('Failed to add to favorites');
+    }
+  };
+
+  const handleListen = (song) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login to listen to songs');
+      return;
+    }
+
+    // Open a simple audio player or navigate to a player page
+    const audioUrl = `http://localhost:5000/api/songs/stream/${song._id}`;
+    window.open(audioUrl, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -188,6 +227,38 @@ const Home = () => {
                         )}
                       </div>
                     )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => handleListen(song)}
+                        className="flex-1 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors text-xs font-medium flex items-center justify-center gap-1"
+                        title="Listen"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                        </svg>
+                        Play
+                      </button>
+                      <button
+                        onClick={() => handleAddToFavorites(song._id)}
+                        className="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                        title="Add to Favorites"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleDownload(song)}
+                        className="px-3 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                        title="Download"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
