@@ -549,287 +549,54 @@ router.patch('/artists/:id/verify', adminAuth, async (req, res) => {
   }
 });
 
-// Add new song with file upload
-router.post('/songs', adminAuth, upload.fields([
-  { name: 'audioFile', maxCount: 1 },
-  { name: 'coverImage', maxCount: 1 }
-]), async (req, res) => {
-  try {
-    const {
-      title,
-      artistId,
-      albumId,
-      genre,
-      duration,
-      releaseDate,
-      lyrics,
-      explicit,
-      bitrate,
-      // Audio features
-      tempo,
-      key,
-      mood,
-      energy,
-      danceability
-    } = req.body;
+// ===== PLAYLIST MANAGEMENT =====
 
-    // Validate required fields
-    if (!title || !artistId || !genre || !duration || !releaseDate) {
-      return res.status(400).json({
-        message: 'Missing required fields: title, artistId, genre, duration, releaseDate'
-      });
-    }
-
-    // Check if audio file was uploaded
-    if (!req.files || !req.files.audioFile || !req.files.audioFile[0]) {
-      return res.status(400).json({ message: 'Audio file is required' });
-    }
-
-    // Check if artist exists
-    const artist = await Artist.findById(artistId);
-    if (!artist) {
-      return res.status(404).json({ message: 'Artist not found' });
-    }
-
-    const audioFile = req.files.audioFile[0];
-    const coverImage = req.files.coverImage ? req.files.coverImage[0] : null;
-
-    // Get file extension to determine format
-    const format = path.extname(audioFile.originalname).slice(1).toLowerCase();
-
-    // Create song object
-    const songData = {
-      title,
-      artist: artistId,
-      album: albumId || null,
-      genre,
-      duration: parseInt(duration),
-      releaseDate: new Date(releaseDate),
-      fileUrl: `/uploads/songs/${audioFile.filename}`,
-      fileName: audioFile.filename,
-      fileSize: audioFile.size,
-      format: format,
-      bitrate: bitrate ? parseInt(bitrate) : 320,
-      coverImage: coverImage ? `/uploads/covers/${coverImage.filename}` : null,
-      lyrics: lyrics || '',
-      explicit: explicit === 'true' || explicit === true,
-      features: {
-        tempo: tempo ? parseFloat(tempo) : undefined,
-        key: key || undefined,
-        mood: mood || undefined,
-        energy: energy ? parseFloat(energy) : undefined,
-        danceability: danceability ? parseFloat(danceability) : undefined
-      }
-    };
-
-    const song = new Song(songData);
-    await song.save();
-
-    // Populate artist info before sending response
-    await song.populate('artist', 'name');
-
-    res.status(201).json({
-      message: 'Song uploaded successfully',
-      song
-    });
-  } catch (error) {
-    console.error('Error uploading song:', error);
-    res.status(500).json({
-      message: 'Error uploading song',
-      error: error.message
-    });
-  }
-});
-
-// Get all artists (for dropdown in add song form)
-router.get('/artists/list', adminAuth, async (req, res) => {
-  try {
-    const artists = await Artist.find().select('name _id').sort({ name: 1 });
-    res.json({ artists });
-  } catch (error) {
-    console.error('Error fetching artists list:', error);
-    res.status(500).json({ message: 'Error fetching artists' });
-  }
-});
-
-// Add new artist with image upload
-router.post('/artists', adminAuth, upload.fields([
-  { name: 'artistImage', maxCount: 1 }
-]), async (req, res) => {
-  try {
-    const {
-      name,
-      bio,
-      genres,
-      monthlyListeners,
-      followers,
-      instagram,
-      twitter,
-      facebook,
-      website
-    } = req.body;
-
-    // Validate required fields
-    if (!name) {
-      return res.status(400).json({
-        message: 'Artist name is required'
-      });
-    }
-
-    // Check if artist already exists
-    const existingArtist = await Artist.findOne({ name });
-    if (existingArtist) {
-      return res.status(400).json({ message: 'Artist with this name already exists' });
-    }
-
-    const artistImage = req.files && req.files.artistImage ? req.files.artistImage[0] : null;
-
-    // Parse genres if it's a string (from form data)
-    let genresArray = [];
-    if (genres) {
-      if (typeof genres === 'string') {
-        genresArray = genres.split(',').map(g => g.trim()).filter(g => g);
-      } else if (Array.isArray(genres)) {
-        genresArray = genres;
-      }
-    }
-
-    // Create artist object
-    const artistData = {
-      name,
-      bio: bio || '',
-      image: artistImage ? `/uploads/artists/${artistImage.filename}` : null,
-      genres: genresArray,
-      monthlyListeners: monthlyListeners ? parseInt(monthlyListeners) : 0,
-      followers: followers ? parseInt(followers) : 0,
-      socialLinks: {
-        instagram: instagram || '',
-        twitter: twitter || '',
-        facebook: facebook || '',
-        website: website || ''
-      }
-    };
-
-    const artist = new Artist(artistData);
-    await artist.save();
-
-    res.status(201).json({
-      message: 'Artist created successfully',
-      artist
-    });
-  } catch (error) {
-    console.error('Error creating artist:', error);
-    res.status(500).json({
-      message: 'Error creating artist',
-      error: error.message
-    });
-  }
-});
-
-// Update artist
-router.patch('/artists/:id', adminAuth, upload.fields([
-  { name: 'artistImage', maxCount: 1 }
-]), async (req, res) => {
-  try {
-    const {
-      name,
-      bio,
-      genres,
-      monthlyListeners,
-      followers,
-      instagram,
-      twitter,
-      facebook,
-      website
-    } = req.body;
-
-    const artist = await Artist.findById(req.params.id);
-    if (!artist) {
-      return res.status(404).json({ message: 'Artist not found' });
-    }
-
-    // Update fields if provided
-    if (name) artist.name = name;
-    if (bio !== undefined) artist.bio = bio;
-
-    // Parse genres if provided
-    if (genres !== undefined) {
-      if (typeof genres === 'string') {
-        artist.genres = genres.split(',').map(g => g.trim()).filter(g => g);
-      } else if (Array.isArray(genres)) {
-        artist.genres = genres;
-      }
-    }
-
-    if (monthlyListeners !== undefined) artist.monthlyListeners = parseInt(monthlyListeners);
-    if (followers !== undefined) artist.followers = parseInt(followers);
-
-    // Update image if uploaded
-    const artistImage = req.files && req.files.artistImage ? req.files.artistImage[0] : null;
-    if (artistImage) {
-      artist.image = `/uploads/artists/${artistImage.filename}`;
-    }
-
-    // Update social links
-    if (instagram !== undefined) artist.socialLinks.instagram = instagram;
-    if (twitter !== undefined) artist.socialLinks.twitter = twitter;
-    if (facebook !== undefined) artist.socialLinks.facebook = facebook;
-    if (website !== undefined) artist.socialLinks.website = website;
-
-    await artist.save();
-
-    res.json({
-      message: 'Artist updated successfully',
-      artist
-    });
-  } catch (error) {
-    console.error('Error updating artist:', error);
-    res.status(500).json({
-      message: 'Error updating artist',
-      error: error.message
-    });
-  }
-});
-
-// Delete artist
-router.delete('/artists/:id', adminAuth, async (req, res) => {
-  try {
-    const artist = await Artist.findByIdAndDelete(req.params.id);
-
-    if (!artist) {
-      return res.status(404).json({ message: 'Artist not found' });
-    }
-
-    // Note: You might want to handle related songs here
-    res.json({ message: 'Artist deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting artist:', error);
-    res.status(500).json({ message: 'Error deleting artist' });
-  }
-});
-
-// ============ PLAYLIST MANAGEMENT ROUTES ============
-
-// Get all playlists with filters
+// Get all playlists with pagination
 router.get('/playlists', adminAuth, async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, owner } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    const query = {};
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
-    if (owner) {
-      query.owner = owner;
-    }
-
-    const playlists = await Playlist.find(query)
+    const playlists = await Playlist.find()
+      .select('name description owner isPublic songs createdAt')
       .populate('owner', 'username email')
-      .populate('collaborators', 'username email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Playlist.countDocuments();
+
+    // Add song count for each playlist
+    const playlistsWithCount = playlists.map(playlist => ({
+      _id: playlist._id,
+      name: playlist.name,
+      description: playlist.description,
+      owner: playlist.owner,
+      isPublic: playlist.isPublic,
+      songCount: playlist.songs.length,
+      createdAt: playlist.createdAt
+    }));
+
+    res.json({
+      playlists: playlistsWithCount,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    res.status(500).json({ message: 'Error fetching playlists' });
+  }
+});
+
+// Get single playlist details
+router.get('/playlists/:id', adminAuth, async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id)
+      .populate('owner', 'username email')
       .populate({
         path: 'songs.song',
         select: 'title artist duration',
@@ -837,209 +604,83 @@ router.get('/playlists', adminAuth, async (req, res) => {
           path: 'artist',
           select: 'name'
         }
-      })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    const total = await Playlist.countDocuments(query);
-
-    res.json({
-      playlists,
-      currentPage: parseInt(page),
-      totalPages: Math.ceil(total / limit),
-      totalPlaylists: total
-    });
-  } catch (error) {
-    console.error('Get playlists error:', error);
-    res.status(500).json({ message: 'Error fetching playlists' });
-  }
-});
-
-// Get single playlist by ID
-router.get('/playlists/:id', adminAuth, async (req, res) => {
-  try {
-    const playlist = await Playlist.findById(req.params.id)
-      .populate('owner', 'username email')
-      .populate('collaborators', 'username email')
-      .populate({
-        path: 'songs.song',
-        select: 'title artist album duration genre coverImage',
-        populate: {
-          path: 'artist',
-          select: 'name'
-        }
       });
 
     if (!playlist) {
       return res.status(404).json({ message: 'Playlist not found' });
     }
 
-    res.json(playlist);
+    res.json({ playlist });
   } catch (error) {
-    console.error('Get playlist error:', error);
-    res.status(500).json({ message: 'Error fetching playlist' });
+    console.error('Error fetching playlist:', error);
+    res.status(500).json({ message: 'Error fetching playlist details' });
   }
 });
 
-// Create playlist (admin creates playlist for a user)
-router.post('/playlists', adminAuth, upload.single('coverImage'), async (req, res) => {
+// Create a new playlist (admin creates for any user)
+router.post('/playlists', adminAuth, async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      owner,
-      isPublic,
-      collaborative,
-      collaborators,
-      songs,
-      allowDownload,
-      allowComments
-    } = req.body;
+    const { name, description, ownerId, isPublic, coverImage } = req.body;
 
-    if (!name || !owner) {
-      return res.status(400).json({ message: 'Name and owner are required' });
+    if (!name) {
+      return res.status(400).json({ message: 'Playlist name is required' });
     }
 
-    // Check if owner exists
-    const ownerUser = await User.findById(owner);
-    if (!ownerUser) {
+    if (!ownerId) {
+      return res.status(400).json({ message: 'Owner ID is required' });
+    }
+
+    // Verify owner exists
+    const owner = await User.findById(ownerId);
+    if (!owner) {
       return res.status(404).json({ message: 'Owner user not found' });
     }
 
-    const playlistData = {
+    const playlist = new Playlist({
       name,
       description: description || '',
-      owner,
-      isPublic: isPublic !== undefined ? isPublic === 'true' : true,
-      collaborative: collaborative === 'true',
-      coverImage: req.file ? `/uploads/covers/${req.file.filename}` : null,
-      privacySettings: {
-        isPublic: isPublic !== undefined ? isPublic === 'true' : true,
-        allowDownload: allowDownload === 'true',
-        allowComments: allowComments !== undefined ? allowComments === 'true' : true
-      }
-    };
+      owner: ownerId,
+      isPublic: isPublic !== undefined ? isPublic : true,
+      coverImage: coverImage || null
+    });
 
-    // Parse collaborators if provided
-    if (collaborators) {
-      try {
-        playlistData.collaborators = JSON.parse(collaborators);
-      } catch (e) {
-        playlistData.collaborators = [];
-      }
-    }
-
-    // Parse songs if provided
-    if (songs) {
-      try {
-        const parsedSongs = JSON.parse(songs);
-        playlistData.songs = parsedSongs.map(songId => ({
-          song: songId,
-          addedAt: new Date()
-        }));
-      } catch (e) {
-        playlistData.songs = [];
-      }
-    }
-
-    const playlist = new Playlist(playlistData);
     await playlist.save();
-
-    // Populate for response
-    await playlist.populate([
-      { path: 'owner', select: 'username email' },
-      { path: 'collaborators', select: 'username email' },
-      { path: 'songs.song', select: 'title artist duration' }
-    ]);
-
-    // Update total duration if songs were added
-    if (playlist.songs.length > 0) {
-      await playlist.updateTotalDuration();
-    }
+    await playlist.populate('owner', 'username email');
 
     res.status(201).json({
       message: 'Playlist created successfully',
       playlist
     });
   } catch (error) {
-    console.error('Create playlist error:', error);
+    console.error('Error creating playlist:', error);
     res.status(500).json({ message: 'Error creating playlist' });
   }
 });
 
 // Update playlist
-router.patch('/playlists/:id', adminAuth, upload.single('coverImage'), async (req, res) => {
+router.patch('/playlists/:id', adminAuth, async (req, res) => {
   try {
+    const { name, description, isPublic, coverImage } = req.body;
+
     const playlist = await Playlist.findById(req.params.id);
     if (!playlist) {
       return res.status(404).json({ message: 'Playlist not found' });
     }
 
-    const {
-      name,
-      description,
-      isPublic,
-      collaborative,
-      collaborators,
-      songs,
-      allowDownload,
-      allowComments
-    } = req.body;
-
-    // Update fields
     if (name) playlist.name = name;
     if (description !== undefined) playlist.description = description;
-    if (isPublic !== undefined) {
-      playlist.isPublic = isPublic === 'true';
-      playlist.privacySettings.isPublic = isPublic === 'true';
-    }
-    if (collaborative !== undefined) playlist.collaborative = collaborative === 'true';
-    if (req.file) playlist.coverImage = `/uploads/covers/${req.file.filename}`;
-
-    // Update privacy settings
-    if (allowDownload !== undefined) playlist.privacySettings.allowDownload = allowDownload === 'true';
-    if (allowComments !== undefined) playlist.privacySettings.allowComments = allowComments === 'true';
-
-    // Update collaborators if provided
-    if (collaborators) {
-      try {
-        playlist.collaborators = JSON.parse(collaborators);
-      } catch (e) {
-        // Keep existing collaborators if parsing fails
-      }
-    }
-
-    // Update songs if provided
-    if (songs) {
-      try {
-        const parsedSongs = JSON.parse(songs);
-        playlist.songs = parsedSongs.map(songId => ({
-          song: songId,
-          addedAt: new Date()
-        }));
-        // Update total duration
-        await playlist.updateTotalDuration();
-      } catch (e) {
-        // Keep existing songs if parsing fails
-      }
-    }
+    if (isPublic !== undefined) playlist.isPublic = isPublic;
+    if (coverImage !== undefined) playlist.coverImage = coverImage;
 
     await playlist.save();
-
-    // Populate for response
-    await playlist.populate([
-      { path: 'owner', select: 'username email' },
-      { path: 'collaborators', select: 'username email' },
-      { path: 'songs.song', select: 'title artist duration' }
-    ]);
+    await playlist.populate('owner', 'username email');
 
     res.json({
       message: 'Playlist updated successfully',
       playlist
     });
   } catch (error) {
-    console.error('Update playlist error:', error);
+    console.error('Error updating playlist:', error);
     res.status(500).json({ message: 'Error updating playlist' });
   }
 });
@@ -1057,6 +698,83 @@ router.delete('/playlists/:id', adminAuth, async (req, res) => {
   } catch (error) {
     console.error('Error deleting playlist:', error);
     res.status(500).json({ message: 'Error deleting playlist' });
+  }
+});
+
+// Add song to playlist
+router.post('/playlists/:id/songs', adminAuth, async (req, res) => {
+  try {
+    const { songId } = req.body;
+
+    if (!songId) {
+      return res.status(400).json({ message: 'Song ID is required' });
+    }
+
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    // Check if song exists
+    const song = await Song.findById(songId);
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
+
+    // Check if song is already in playlist
+    const songExists = playlist.songs.some(item => item.song.toString() === songId);
+    if (songExists) {
+      return res.status(400).json({ message: 'Song already in playlist' });
+    }
+
+    // Add song to playlist
+    playlist.songs.push({
+      song: songId,
+      addedAt: new Date()
+    });
+
+    await playlist.updateTotalDuration();
+    await playlist.populate({
+      path: 'songs.song',
+      select: 'title artist duration',
+      populate: {
+        path: 'artist',
+        select: 'name'
+      }
+    });
+
+    res.json({
+      message: 'Song added to playlist',
+      playlist
+    });
+  } catch (error) {
+    console.error('Error adding song to playlist:', error);
+    res.status(500).json({ message: 'Error adding song to playlist' });
+  }
+});
+
+// Remove song from playlist
+router.delete('/playlists/:id/songs/:songId', adminAuth, async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    // Remove song
+    playlist.songs = playlist.songs.filter(
+      item => item.song.toString() !== req.params.songId
+    );
+
+    await playlist.updateTotalDuration();
+
+    res.json({
+      message: 'Song removed from playlist',
+      playlist
+    });
+  } catch (error) {
+    console.error('Error removing song from playlist:', error);
+    res.status(500).json({ message: 'Error removing song from playlist' });
   }
 });
 
