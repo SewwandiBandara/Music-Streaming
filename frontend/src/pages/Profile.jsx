@@ -14,6 +14,10 @@ const Profile = () => {
   const [myPlaylists, setMyPlaylists] = useState([]);
   const [allPlaylists, setAllPlaylists] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [allSongs, setAllSongs] = useState([]);
+  const [songsLoading, setSongsLoading] = useState(false);
+  const [allArtists, setAllArtists] = useState([]);
+  const [artistsLoading, setArtistsLoading] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -71,10 +75,94 @@ const Profile = () => {
     }
   };
 
+  const fetchAllSongs = async () => {
+    try {
+      setSongsLoading(true);
+      const response = await axios.get('http://localhost:5000/api/songs');
+      setAllSongs(response.data.songs || []);
+    } catch (error) {
+      console.error('Error fetching songs:', error);
+    } finally {
+      setSongsLoading(false);
+    }
+  };
+
+  const fetchAllArtists = async () => {
+    try {
+      setArtistsLoading(true);
+      const response = await axios.get('http://localhost:5000/api/artists');
+      setAllArtists(response.data.artists || []);
+    } catch (error) {
+      console.error('Error fetching artists:', error);
+    } finally {
+      setArtistsLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/');
+  };
+
+  const formatDuration = (seconds) => {
+    if (!seconds) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatFollowers = (count) => {
+    if (!count) return '0 followers';
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M followers`;
+    }
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K followers`;
+    }
+    return `${count} followers`;
+  };
+
+  const handleListen = (song) => {
+    console.log('Playing song:', song.title);
+    // TODO: Implement audio player functionality
+    alert(`Playing: ${song.title} by ${song.artist?.name || 'Unknown Artist'}`);
+  };
+
+  const handleAddToFavorites = async (songId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`http://localhost:5000/api/songs/${songId}/favorite`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Song added to favorites!');
+    } catch (error) {
+      console.error('Error adding to favorites:', error);
+      alert('Failed to add song to favorites');
+    }
+  };
+
+  const handleDownload = async (song) => {
+    try {
+      if (!song.audioFile) {
+        alert('Audio file not available');
+        return;
+      }
+      const response = await axios.get(`http://localhost:5000${song.audioFile}`, {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${song.title}.${song.format || 'mp3'}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading song:', error);
+      alert('Failed to download song');
+    }
   };
 
   if (!user) {
