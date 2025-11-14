@@ -72,5 +72,16 @@
   "Page Not Found": "Page Not Found",
   "Sorry, we couldn't find the page you're looking for.": "Sorry, we couldn't find the page you're looking for.",
   "Go Home": "Go Home",
-  "My Library": "My Library"
+  "My Library": "My Library",
+  "Welcome back! Sign in to your account": "Welcome back! Sign in to your account",
+  "Email": "Email",
+  "you@example.com": "you@example.com",
+  "Signing in...": "Signing in...",
+  "Sign up here": "Sign up here",
+  "Join us and start streaming music today!": "Join us and start streaming music today!",
+  "Enter a strong password": "Enter a strong password",
+  "Creating account...": "Creating account...",
+  "Sign in here": "Sign in here",
+  "No favorites yet": "No favorites yet",
+  "Start adding songs to your favorites by clicking the heart icon": "Start adding songs to your favorites by clicking the heart icon"
 }

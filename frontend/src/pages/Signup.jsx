@@ -80,8 +80,8 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-slate-900 to-black px-4">
         <div className="max-w-md w-full space-y-8">
         <div className="text-center ">
-          <h2 className="text-4xl font-bold text-white mb-2">{t('authSignupTitle')}</h2>
-          <p className="text-slate-300">{t('authSignupSubtitle')}</p>
+          <h2 className="text-4xl font-bold text-white mb-2">{t('Create Account')}</h2>
+          <p className="text-slate-300">{t('Join us and start streaming music today!')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6 bg-slate-900/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-slate-700/50">
@@ -94,7 +94,7 @@ const Signup = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-slate-200 mb-2">
-                {t('authSignupUsername')}
+                {t('Username')}
               </label>
               <input
                 id="username"
@@ -103,13 +103,13 @@ const Signup = () => {
                 value={username}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder={t('authSignupUsernamePlaceholder')}
+                placeholder={t('Choose a username')}
               />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
-                {t('authSignupEmail')}
+                {t('Email')}
               </label>
               <input
                 id="email"
@@ -118,13 +118,13 @@ const Signup = () => {
                 value={email}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder={t('authSignupEmailPlaceholder')}
+                placeholder={t('you@example.com')}
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
-                {t('authSignupPassword')}
+                {t('Password')}
               </label>
               <input
                 id="password"
@@ -133,13 +133,13 @@ const Signup = () => {
                 value={password}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder={t('authSignupPasswordPlaceholder')}
+                placeholder={t('Enter a strong password')}
               />
             </div>
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-200 mb-2">
-                {t('authSignupConfirmPassword')}
+                {t('Confirm Password')}
               </label>
               <input
                 id="confirmPassword"
@@ -148,7 +148,7 @@ const Signup = () => {
                 value={confirmPassword}
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder={t('authSignupConfirmPasswordPlaceholder')}
+                placeholder={t('Confirm your password')}
               />
             </div>
           </div>
@@ -159,21 +159,21 @@ const Signup = () => {
               disabled={loading}
               className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-700 to-blue-900 hover:from-blue-600 hover:to-blue-800 text-white font-semibold rounded-lg shadow-lg transform transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {loading ? t('authSignupLoading') : t('authSignupButton')}
+              {loading ? t('Creating account...') : t('Sign Up')}
             </button>
             <button
               type="button"
               onClick={() => navigate('/')}
               className="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg shadow-lg transform transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-900"
             >
-              {t('authSignupCancel')}
+              {t('Cancel')}
             </button>
           </div>
 
           <div className="text-center text-slate-300 text-sm">
-            {t('authSignupHaveAccount')}{' '}
+            {t('Already have an account?')}{' '}
             <Link to="/signin" className="text-blue-400 hover:text-blue-300 font-medium transition">
-              {t('authSignupSignin')}
+              {t('Sign in here')}
             </Link>
           </div>
         </form>

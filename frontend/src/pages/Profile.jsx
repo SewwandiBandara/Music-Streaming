@@ -35,17 +35,17 @@ const Profile = () => {
   }
 
   const myContentTabs = [
-    { id: 'favorites', label: t('profileTabsFavorites'), icon: '❤️' },
-    { id: 'playlists', label: t('profileTabsPlaylists'), icon: '🎵' },
-    { id: 'saved', label: t('profileTabsSaved'), icon: '💾' },
-    { id: 'albums', label: t('profileTabsAlbums'), icon: '💿' },
+    { id: 'favorites', label: t('Favorites'), icon: '❤️' },
+    { id: 'playlists', label: t('Playlists'), icon: '🎵' },
+    { id: 'saved', label: t('Saved'), icon: '💾' },
+    { id: 'albums', label: t('Albums'), icon: '💿' },
   ];
 
   const discoverTabs = [
-    { id: 'all-songs', label: t('profileTabsAllSongs'), icon: '🎵' },
-    { id: 'all-albums', label: t('profileTabsAllAlbums'), icon: '💿' },
-    { id: 'all-playlists', label: t('profileTabsAllPlaylists'), icon: '📝' },
-    { id: 'all-artists', label: t('profileTabsAllArtists'), icon: '🎤' },
+    { id: 'all-songs', label: t('All Songs'), icon: '🎵' },
+    { id: 'all-albums', label: t('All Albums'), icon: '💿' },
+    { id: 'all-playlists', label: t('All Playlists'), icon: '📝' },
+    { id: 'all-artists', label: t('All Artists'), icon: '🎤' },
   ];
 
   const allSongs = [
@@ -131,7 +131,7 @@ const Profile = () => {
               onClick={handleLogout}
               className="px-6 py-3 bg-white text-blue-900 font-semibold rounded-full hover:bg-gray-100 transform hover:scale-105 transition-all duration-200 shadow-lg"
             >
-              {t('navbarLogout')}
+              {t('Logout')}
             </button>
           </div>
         </div>
@@ -146,7 +146,7 @@ const Profile = () => {
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300'
             }`}
           >
-            📚 {t('profileMyContent')}
+            📚 {t('My Content')}
           </button>
           <button
             onClick={() => setActiveSection('discover')}
@@ -156,7 +156,7 @@ const Profile = () => {
                 : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300'
             }`}
           >
-            🔍 {t('profileDiscoverMusic')}
+            🔍 {t('Discover Music')}
           </button>
         </div>
 
@@ -168,7 +168,7 @@ const Profile = () => {
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">{t('profileStatsLikedSongs')}</p>
+                    <p className="text-sm text-gray-600 mb-1">{t('Liked Songs')}</p>
                     <p className="text-3xl font-bold text-blue-900">0</p>
                   </div>
                   <div className="text-4xl">❤️</div>
@@ -177,7 +177,7 @@ const Profile = () => {
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">{t('profileStatsMyPlaylists')}</p>
+                    <p className="text-sm text-gray-600 mb-1">{t('My Playlists')}</p>
                     <p className="text-3xl font-bold text-blue-800">0</p>
                   </div>
                   <div className="text-4xl">🎵</div>
@@ -186,7 +186,7 @@ const Profile = () => {
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">{t('profileTabsSaved')}</p>
+                    <p className="text-sm text-gray-600 mb-1">{t('Saved')}</p>
                     <p className="text-3xl font-bold text-blue-700">0</p>
                   </div>
                   <div className="text-4xl">💾</div>
@@ -195,7 +195,7 @@ const Profile = () => {
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">{t('profileStatsSavedAlbums')}</p>
+                    <p className="text-sm text-gray-600 mb-1">{t('Saved Albums')}</p>
                     <p className="text-3xl font-bold text-blue-600">0</p>
                   </div>
                   <div className="text-4xl">💿</div>
@@ -229,15 +229,15 @@ const Profile = () => {
                 {activeTab === 'favorites' && (
                   <div className="text-center py-16">
                     <div className="text-6xl mb-4">❤️</div>
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-2">{t('profileEmptyStateTitle')}</h3>
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-2">{t('No favorites yet')}</h3>
                     <p className="text-gray-600 mb-6">
-                      {t('profileEmptyStateDescription')}
+                      {t('Start adding songs to your favorites by clicking the heart icon')}
                     </p>
                     <button
                       onClick={() => setActiveSection('discover')}
                       className="px-6 py-3 bg-blue-900 text-white font-semibold rounded-full hover:bg-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg"
                     >
-                      {t('profileEmptyStateButton')}
+                      {t('Discover Music')}
                     </button>
                   </div>
                 )}
@@ -305,7 +305,7 @@ const Profile = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('profileSearch')}
+                    placeholder={t('Search songs, artists, albums...')}
                     className="w-full px-6 py-4 pl-14 pr-4 rounded-full bg-gray-100 border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
                   />
                   <svg
@@ -400,7 +400,7 @@ const Profile = () => {
                           <div className="flex-1">
                             <h3 className="font-semibold text-gray-900 mb-1">{playlist.name}</h3>
                             <p className="text-xs text-gray-500 mb-1">{playlist.description}</p>
-                            <p className="text-sm text-gray-600">{playlist.count} {t('profileSongs')}</p>
+                            <p className="text-sm text-gray-600">{playlist.count} {t('songs')}</p>
                           </div>
                         </div>
                         <button className="w-full py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">

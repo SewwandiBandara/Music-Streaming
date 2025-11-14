@@ -72,5 +72,16 @@
   "Page Not Found": "பக்கம் கிடைக்கவில்லை",
   "Sorry, we couldn't find the page you're looking for.": "மன்னிக்கவும், நீங்கள் தேடும் பக்கத்தை எங்களால் கண்டுபிடிக்க முடியவில்லை.",
   "Go Home": "முகப்புக்குச் செல்",
-  "My Library": "எனது நூலகம்"
+  "My Library": "எனது நூலகம்",
+  "Welcome back! Sign in to your account": "மீண்டும் வருக! உங்கள் கணக்கில் உள்நுழையவும்",
+  "Email": "மின்னஞ்சல்",
+  "you@example.com": "you@example.com",
+  "Signing in...": "உள்நுழைகிறது...",
+  "Sign up here": "இங்கே பதிவு செய்யவும்",
+  "Join us and start streaming music today!": "எங்களுடன் சேர்ந்து இன்றே இசை ஸ்ட்ரீமிங் செய்யத் தொடங்குங்கள்!",
+  "Enter a strong password": "வலுவான கடவுச்சொல்லை உள்ளிடவும்",
+  "Creating account...": "கணக்கை உருவாக்குகிறது...",
+  "Sign in here": "இங்கே உள்நுழையவும்",
+  "No favorites yet": "இன்னும் விருப்பங்கள் இல்லை",
+  "Start adding songs to your favorites by clicking the heart icon": "இதய ஐகானைக் கிளிக் செய்வதன் மூலம் உங்கள் விருப்பங்களில் பாடல்களைச் சேர்க்கத் தொடங்குங்கள்"
 }
