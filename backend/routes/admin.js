@@ -77,9 +77,18 @@ router.get('/stats', adminAuth, async (req, res) => {
       Playlist.countDocuments()
     ]);
 
+    // Get subscription breakdown
+    const freeUsers = await User.countDocuments({ 'subscription.type': 'free' });
+    const premiumUsers = await User.countDocuments({ 'subscription.type': 'premium' });
+    const familyUsers = await User.countDocuments({ 'subscription.type': 'family' });
+
+    // Get active/inactive users
+    const activeUsers = await User.countDocuments({ isActive: true });
+    const verifiedUsers = await User.countDocuments({ isVerified: true });
+
     // Get recent users
     const recentUsers = await User.find()
-      .select('username email createdAt')
+      .select('username email subscription createdAt isActive isVerified')
       .sort({ createdAt: -1 })
       .limit(5);
 
@@ -100,7 +109,14 @@ router.get('/stats', adminAuth, async (req, res) => {
         totalSongs: songCount,
         totalArtists: artistCount,
         totalPlaylists: playlistCount,
-        totalPlays: totalPlays
+        totalPlays: totalPlays,
+        subscriptions: {
+          free: freeUsers,
+          premium: premiumUsers,
+          family: familyUsers
+        },
+        activeUsers,
+        verifiedUsers
       },
       recentUsers,
       recentSongs
@@ -119,7 +135,7 @@ router.get('/users', adminAuth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const users = await User.find()
-      .select('username email createdAt')
+      .select('username name email subscription createdAt isActive isVerified')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -137,6 +153,231 @@ router.get('/users', adminAuth, async (req, res) => {
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
+// Get single user details
+router.get('/users/:id', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .populate('likedSongs', 'title artist')
+      .populate('followedArtists', 'name')
+      .populate('playlists', 'name');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Error fetching user details' });
+  }
+});
+
+// Update user subscription
+router.patch('/users/:id/subscription', adminAuth, async (req, res) => {
+  try {
+    const { type, endDate, autoRenew } = req.body;
+
+    if (!['free', 'premium', 'family'].includes(type)) {
+      return res.status(400).json({ message: 'Invalid subscription type' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.subscription = {
+      type,
+      startDate: user.subscription.startDate || new Date(),
+      endDate: endDate || null,
+      autoRenew: autoRenew !== undefined ? autoRenew : false
+    };
+
+    await user.save();
+
+    res.json({
+      message: 'Subscription updated successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        subscription: user.subscription
+      }
+    });
+  } catch (error) {
+    console.error('Error updating subscription:', error);
+    res.status(500).json({ message: 'Error updating subscription' });
+  }
+});
+
+// Update user preferences
+router.patch('/users/:id/preferences', adminAuth, async (req, res) => {
+  try {
+    const { language, audioQuality, explicitContent, autoplay, downloadQuality } = req.body;
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (language) user.preferences.language = language;
+    if (audioQuality) user.preferences.audioQuality = audioQuality;
+    if (explicitContent !== undefined) user.preferences.explicitContent = explicitContent;
+    if (autoplay !== undefined) user.preferences.autoplay = autoplay;
+    if (downloadQuality) user.preferences.downloadQuality = downloadQuality;
+
+    await user.save();
+
+    res.json({
+      message: 'Preferences updated successfully',
+      preferences: user.preferences
+    });
+  } catch (error) {
+    console.error('Error updating preferences:', error);
+    res.status(500).json({ message: 'Error updating preferences' });
+  }
+});
+
+// Update user profile
+router.patch('/users/:id/profile', adminAuth, async (req, res) => {
+  try {
+    const { name, email, username } = req.body;
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if email is already taken by another user
+    if (email && email !== user.email) {
+      const existingEmail = await User.findOne({ email, _id: { $ne: user._id } });
+      if (existingEmail) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+      user.email = email;
+    }
+
+    // Check if username is already taken by another user
+    if (username && username !== user.username) {
+      const existingUsername = await User.findOne({ username, _id: { $ne: user._id } });
+      if (existingUsername) {
+        return res.status(400).json({ message: 'Username already taken' });
+      }
+      user.username = username;
+    }
+
+    if (name) user.name = name;
+
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+});
+
+// Toggle user active status
+router.patch('/users/:id/toggle-active', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.isActive = !user.isActive;
+    await user.save();
+
+    res.json({
+      message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`,
+      user: {
+        id: user._id,
+        username: user.username,
+        isActive: user.isActive
+      }
+    });
+  } catch (error) {
+    console.error('Error toggling user status:', error);
+    res.status(500).json({ message: 'Error updating user status' });
+  }
+});
+
+// Toggle user verified status
+router.patch('/users/:id/toggle-verified', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.isVerified = !user.isVerified;
+    await user.save();
+
+    res.json({
+      message: `User ${user.isVerified ? 'verified' : 'unverified'} successfully`,
+      user: {
+        id: user._id,
+        username: user.username,
+        isVerified: user.isVerified
+      }
+    });
+  } catch (error) {
+    console.error('Error toggling verification:', error);
+    res.status(500).json({ message: 'Error updating verification status' });
+  }
+});
+
+// Get user's liked songs
+router.get('/users/:id/liked-songs', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate({
+        path: 'likedSongs',
+        populate: { path: 'artist', select: 'name' }
+      });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      username: user.username,
+      likedSongs: user.likedSongs
+    });
+  } catch (error) {
+    console.error('Error fetching liked songs:', error);
+    res.status(500).json({ message: 'Error fetching liked songs' });
+  }
+});
+
+// Get user's followed artists
+router.get('/users/:id/followed-artists', adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate('followedArtists', 'name bio image isVerified');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      username: user.username,
+      followedArtists: user.followedArtists
+    });
+  } catch (error) {
+    console.error('Error fetching followed artists:', error);
+    res.status(500).json({ message: 'Error fetching followed artists' });
   }
 });
 
