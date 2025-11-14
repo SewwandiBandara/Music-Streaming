@@ -16,7 +16,7 @@ const Browse = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-blue-900 mb-8">{t('browseTitle')}</h1>
+        <h1 className="text-4xl font-bold text-blue-900 mb-8">{t('Browse Music')}</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {genres.map((genre) => (
@@ -34,7 +34,7 @@ const Browse = () => {
         </div>
 
         <div className="mt-16">
-          <h2 className="text-3xl font-bold text-blue-900 mb-6">{t('browseCategories')}</h2>
+          <h2 className="text-3xl font-bold text-blue-900 mb-6">{t('Categories')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow duration-200 border border-gray-200">

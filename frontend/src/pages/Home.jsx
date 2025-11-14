@@ -37,10 +37,10 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-blue-900 mb-4">
-            {t('homeWelcome')}
+            {t('Welcome to M-Tunes')}
           </h1>
           <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-            {t('homeSubtitle')}
+            {t('Discover, stream, and enjoy millions of songs from your favorite artists.')}
           </p>
         </div>
 
