@@ -549,6 +549,22 @@ router.patch('/artists/:id/verify', adminAuth, async (req, res) => {
   }
 });
 
+// Delete artist
+router.delete('/artists/:id', adminAuth, async (req, res) => {
+  try {
+    const artist = await Artist.findByIdAndDelete(req.params.id);
+
+    if (!artist) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+
+    res.json({ message: 'Artist deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting artist:', error);
+    res.status(500).json({ message: 'Error deleting artist' });
+  }
+});
+
 // ===== PLAYLIST MANAGEMENT =====
 
 // Get all playlists with pagination

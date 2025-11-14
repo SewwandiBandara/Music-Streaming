@@ -111,6 +111,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteArtist = async (artistId) => {
+    if (!window.confirm('Are you sure you want to delete this artist?')) return;
+
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/artists/${artistId}`, {
+        headers: getAuthHeader()
+      });
+      setArtists(artists.filter(artist => artist._id !== artistId));
+      fetchDashboardData(); // Refresh stats
+    } catch (err) {
+      console.error('Error deleting artist:', err);
+      alert('Failed to delete artist');
+    }
+  };
+
   const handleCreatePlaylist = async (e) => {
     e.preventDefault();
     if (!newPlaylist.name || !newPlaylist.ownerId) {
@@ -182,18 +197,21 @@ const AdminDashboard = () => {
       {/* Navigation Tabs */}
       <div className="bg-white shadow-md border-b border-gray-200">
         <div className="container mx-auto px-4">
-          <nav className="flex space-x-8">
-            {['overview', 'users', 'songs', 'artists', 'playlists'].map((tab) => (
+          <nav className="flex space-x-4 overflow-x-auto">
+            {['overview', 'users', 'songs', 'add-song', 'artists', 'add-artist', 'playlists', 'add-playlist', 'albums'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 px-2 border-b-2 font-medium text-sm transition ${
+                className={`py-4 px-3 border-b-2 font-medium text-sm transition whitespace-nowrap ${
                   activeTab === tab
                     ? 'border-blue-700 text-blue-900'
                     : 'border-transparent text-gray-600 hover:text-blue-700'
                 }`}
               >
-                {tab === 'add-song' ? 'Add Song' : tab === 'add-artist' ? 'Add Artist' : tab === 'add-playlist' ? 'Add Playlist' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'add-song' ? '+ Add Song' :
+                 tab === 'add-artist' ? '+ Add Artist' :
+                 tab === 'add-playlist' ? '+ Add Playlist' :
+                 tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </nav>
@@ -844,140 +862,22 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Playlists Tab */}
-        {activeTab === 'playlists' && (
-          <div>
-            {/* Create Playlist Button */}
-            <div className="mb-6 flex justify-end">
-              <button
-                onClick={() => setShowCreatePlaylist(!showCreatePlaylist)}
-                className="px-6 py-3 bg-blue-900 text-white font-semibold rounded-full hover:bg-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg"
-              >
-                {showCreatePlaylist ? 'Cancel' : '+ Create Playlist'}
-              </button>
-            </div>
+        {/* Add Playlist Tab */}
+        {activeTab === 'add-playlist' && (
+          <AddPlaylistForm onPlaylistAdded={() => {
+            fetchDashboardData();
+            setActiveTab('playlists');
+          }} />
+        )}
 
-            {/* Create Playlist Form */}
-            {showCreatePlaylist && (
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New Playlist</h3>
-                <form onSubmit={handleCreatePlaylist} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Playlist Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={newPlaylist.name}
-                      onChange={(e) => setNewPlaylist({ ...newPlaylist, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter playlist name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea
-                      value={newPlaylist.description}
-                      onChange={(e) => setNewPlaylist({ ...newPlaylist, description: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter description"
-                      rows="3"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Owner User ID *</label>
-                    <input
-                      type="text"
-                      required
-                      value={newPlaylist.ownerId}
-                      onChange={(e) => setNewPlaylist({ ...newPlaylist, ownerId: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter user ID"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Tip: Copy user ID from Users tab</p>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="isPublic"
-                      checked={newPlaylist.isPublic}
-                      onChange={(e) => setNewPlaylist({ ...newPlaylist, isPublic: e.target.checked })}
-                      className="w-4 h-4 text-blue-900 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <label htmlFor="isPublic" className="ml-2 text-sm text-gray-700">Public Playlist</label>
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="submit"
-                      className="px-6 py-2 bg-blue-900 text-white font-semibold rounded-lg hover:bg-blue-800 transition"
-                    >
-                      Create Playlist
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowCreatePlaylist(false);
-                        setNewPlaylist({ name: '', description: '', ownerId: '', isPublic: true });
-                      }}
-                      className="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* Playlists Table */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
-                <h2 className="text-xl font-semibold text-blue-900">Playlists Management</h2>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Owner</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Songs</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Visibility</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Created</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {playlists.map((playlist) => (
-                      <tr key={playlist._id} className="hover:bg-blue-50 transition">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{playlist.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {playlist.owner?.username || 'Unknown'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {playlist.songCount || 0}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {playlist.isPublic ? (
-                            <span className="px-2 py-1 bg-green-600 text-white text-xs rounded-full">Public</span>
-                          ) : (
-                            <span className="px-2 py-1 bg-gray-400 text-white text-xs rounded-full">Private</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {new Date(playlist.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <button
-                            onClick={() => handleDeletePlaylist(playlist._id)}
-                            className="text-red-600 hover:text-red-800 font-medium transition"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        {/* Albums Tab */}
+        {activeTab === 'albums' && (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-12 text-center">
+            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+            </svg>
+            <p className="text-gray-500 text-lg">Album Management Coming Soon</p>
+            <p className="text-gray-400 text-sm mt-2">Album features will be available in a future update</p>
           </div>
         )}
       </div>
