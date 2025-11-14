@@ -432,7 +432,6 @@ router.get('/songs', adminAuth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const songs = await Song.find({ isActive: true })
-      .select('title artist album duration playCount createdAt')
       .populate('artist', 'name')
       .populate('album', 'title')
       .sort({ createdAt: -1 })
@@ -797,6 +796,258 @@ router.delete('/artists/:id', adminAuth, async (req, res) => {
   } catch (error) {
     console.error('Error deleting artist:', error);
     res.status(500).json({ message: 'Error deleting artist' });
+  }
+});
+
+// ============ PLAYLIST MANAGEMENT ROUTES ============
+
+// Get all playlists with filters
+router.get('/playlists', adminAuth, async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search, owner } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    if (owner) {
+      query.owner = owner;
+    }
+
+    const playlists = await Playlist.find(query)
+      .populate('owner', 'username email')
+      .populate('collaborators', 'username email')
+      .populate({
+        path: 'songs.song',
+        select: 'title artist duration',
+        populate: {
+          path: 'artist',
+          select: 'name'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Playlist.countDocuments(query);
+
+    res.json({
+      playlists,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      totalPlaylists: total
+    });
+  } catch (error) {
+    console.error('Get playlists error:', error);
+    res.status(500).json({ message: 'Error fetching playlists' });
+  }
+});
+
+// Get single playlist by ID
+router.get('/playlists/:id', adminAuth, async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id)
+      .populate('owner', 'username email')
+      .populate('collaborators', 'username email')
+      .populate({
+        path: 'songs.song',
+        select: 'title artist album duration genre coverImage',
+        populate: {
+          path: 'artist',
+          select: 'name'
+        }
+      });
+
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    res.json(playlist);
+  } catch (error) {
+    console.error('Get playlist error:', error);
+    res.status(500).json({ message: 'Error fetching playlist' });
+  }
+});
+
+// Create playlist (admin creates playlist for a user)
+router.post('/playlists', adminAuth, upload.single('coverImage'), async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      owner,
+      isPublic,
+      collaborative,
+      collaborators,
+      songs,
+      allowDownload,
+      allowComments
+    } = req.body;
+
+    if (!name || !owner) {
+      return res.status(400).json({ message: 'Name and owner are required' });
+    }
+
+    // Check if owner exists
+    const ownerUser = await User.findById(owner);
+    if (!ownerUser) {
+      return res.status(404).json({ message: 'Owner user not found' });
+    }
+
+    const playlistData = {
+      name,
+      description: description || '',
+      owner,
+      isPublic: isPublic !== undefined ? isPublic === 'true' : true,
+      collaborative: collaborative === 'true',
+      coverImage: req.file ? `/uploads/covers/${req.file.filename}` : null,
+      privacySettings: {
+        isPublic: isPublic !== undefined ? isPublic === 'true' : true,
+        allowDownload: allowDownload === 'true',
+        allowComments: allowComments !== undefined ? allowComments === 'true' : true
+      }
+    };
+
+    // Parse collaborators if provided
+    if (collaborators) {
+      try {
+        playlistData.collaborators = JSON.parse(collaborators);
+      } catch (e) {
+        playlistData.collaborators = [];
+      }
+    }
+
+    // Parse songs if provided
+    if (songs) {
+      try {
+        const parsedSongs = JSON.parse(songs);
+        playlistData.songs = parsedSongs.map(songId => ({
+          song: songId,
+          addedAt: new Date()
+        }));
+      } catch (e) {
+        playlistData.songs = [];
+      }
+    }
+
+    const playlist = new Playlist(playlistData);
+    await playlist.save();
+
+    // Populate for response
+    await playlist.populate([
+      { path: 'owner', select: 'username email' },
+      { path: 'collaborators', select: 'username email' },
+      { path: 'songs.song', select: 'title artist duration' }
+    ]);
+
+    // Update total duration if songs were added
+    if (playlist.songs.length > 0) {
+      await playlist.updateTotalDuration();
+    }
+
+    res.status(201).json({
+      message: 'Playlist created successfully',
+      playlist
+    });
+  } catch (error) {
+    console.error('Create playlist error:', error);
+    res.status(500).json({ message: 'Error creating playlist' });
+  }
+});
+
+// Update playlist
+router.patch('/playlists/:id', adminAuth, upload.single('coverImage'), async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    const {
+      name,
+      description,
+      isPublic,
+      collaborative,
+      collaborators,
+      songs,
+      allowDownload,
+      allowComments
+    } = req.body;
+
+    // Update fields
+    if (name) playlist.name = name;
+    if (description !== undefined) playlist.description = description;
+    if (isPublic !== undefined) {
+      playlist.isPublic = isPublic === 'true';
+      playlist.privacySettings.isPublic = isPublic === 'true';
+    }
+    if (collaborative !== undefined) playlist.collaborative = collaborative === 'true';
+    if (req.file) playlist.coverImage = `/uploads/covers/${req.file.filename}`;
+
+    // Update privacy settings
+    if (allowDownload !== undefined) playlist.privacySettings.allowDownload = allowDownload === 'true';
+    if (allowComments !== undefined) playlist.privacySettings.allowComments = allowComments === 'true';
+
+    // Update collaborators if provided
+    if (collaborators) {
+      try {
+        playlist.collaborators = JSON.parse(collaborators);
+      } catch (e) {
+        // Keep existing collaborators if parsing fails
+      }
+    }
+
+    // Update songs if provided
+    if (songs) {
+      try {
+        const parsedSongs = JSON.parse(songs);
+        playlist.songs = parsedSongs.map(songId => ({
+          song: songId,
+          addedAt: new Date()
+        }));
+        // Update total duration
+        await playlist.updateTotalDuration();
+      } catch (e) {
+        // Keep existing songs if parsing fails
+      }
+    }
+
+    await playlist.save();
+
+    // Populate for response
+    await playlist.populate([
+      { path: 'owner', select: 'username email' },
+      { path: 'collaborators', select: 'username email' },
+      { path: 'songs.song', select: 'title artist duration' }
+    ]);
+
+    res.json({
+      message: 'Playlist updated successfully',
+      playlist
+    });
+  } catch (error) {
+    console.error('Update playlist error:', error);
+    res.status(500).json({ message: 'Error updating playlist' });
+  }
+});
+
+// Delete playlist
+router.delete('/playlists/:id', adminAuth, async (req, res) => {
+  try {
+    const playlist = await Playlist.findByIdAndDelete(req.params.id);
+
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    res.json({ message: 'Playlist deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting playlist:', error);
+    res.status(500).json({ message: 'Error deleting playlist' });
   }
 });
 

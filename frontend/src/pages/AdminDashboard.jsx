@@ -4,17 +4,19 @@ import { useAdmin } from '../context/AdminContext';
 import axios from 'axios';
 import AddSongForm from '../components/AddSongForm';
 import AddArtistForm from '../components/AddArtistForm';
+import AddPlaylistForm from '../components/AddPlaylistForm';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [songs, setSongs] = useState([]);
   const [artists, setArtists] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { admin, logout, getAuthHeader, isAuthenticated } = useAdmin();
+  const { admin, logout, getAuthHeader, isAuthenticated} = useAdmin();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,20 +31,37 @@ const AdminDashboard = () => {
       setLoading(true);
       const headers = getAuthHeader();
 
-      const [statsRes, usersRes, songsRes, artistsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/admin/stats', { headers }),
-        axios.get('http://localhost:5000/api/admin/users?limit=10', { headers }),
-        axios.get('http://localhost:5000/api/admin/songs?limit=10', { headers }),
-        axios.get('http://localhost:5000/api/admin/artists?limit=10', { headers })
-      ]);
+      // Fetch each endpoint separately to identify which one fails
+      console.log('Fetching stats...');
+      const statsRes = await axios.get('http://localhost:5000/api/admin/stats', { headers });
+      console.log('Stats fetched:', statsRes.data);
+
+      console.log('Fetching users...');
+      const usersRes = await axios.get('http://localhost:5000/api/admin/users?limit=10', { headers });
+      console.log('Users fetched:', usersRes.data);
+
+      console.log('Fetching songs...');
+      const songsRes = await axios.get('http://localhost:5000/api/admin/songs?limit=10', { headers });
+      console.log('Songs fetched:', songsRes.data);
+
+      console.log('Fetching artists...');
+      const artistsRes = await axios.get('http://localhost:5000/api/admin/artists?limit=10', { headers });
+      console.log('Artists fetched:', artistsRes.data);
+
+      console.log('Fetching playlists...');
+      const playlistsRes = await axios.get('http://localhost:5000/api/admin/playlists?limit=10', { headers });
+      console.log('Playlists fetched:', playlistsRes.data);
 
       setStats(statsRes.data.stats);
       setUsers(usersRes.data.users);
       setSongs(songsRes.data.songs);
       setArtists(artistsRes.data.artists);
+      setPlaylists(playlistsRes.data.playlists);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      setError('Failed to load dashboard data');
+      console.error('Error response:', err.response);
+      console.error('Error config:', err.config);
+      setError('Failed to load dashboard data: ' + (err.response?.data?.message || err.message));
       if (err.response?.status === 401 || err.response?.status === 403) {
         handleLogout();
       }
@@ -118,6 +137,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeletePlaylist = async (playlistId) => {
+    if (!window.confirm('Are you sure you want to delete this playlist?')) return;
+
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/playlists/${playlistId}`, {
+        headers: getAuthHeader()
+      });
+      setPlaylists(playlists.filter(playlist => playlist._id !== playlistId));
+      fetchDashboardData(); // Refresh stats
+    } catch (err) {
+      console.error('Error deleting playlist:', err);
+      alert('Failed to delete playlist');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -152,7 +186,7 @@ const AdminDashboard = () => {
       <div className="bg-white shadow-md border-b border-gray-200">
         <div className="container mx-auto px-4">
           <nav className="flex space-x-8">
-            {['overview', 'users', 'songs', 'add-song', 'artists', 'add-artist'].map((tab) => (
+            {['overview', 'users', 'songs', 'add-song', 'artists', 'add-artist', 'playlists', 'add-playlist'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -162,7 +196,7 @@ const AdminDashboard = () => {
                     : 'border-transparent text-gray-600 hover:text-blue-700'
                 }`}
               >
-                {tab === 'add-song' ? 'Add Song' : tab === 'add-artist' ? 'Add Artist' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'add-song' ? 'Add Song' : tab === 'add-artist' ? 'Add Artist' : tab === 'add-playlist' ? 'Add Playlist' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </nav>
@@ -616,6 +650,208 @@ const AdminDashboard = () => {
           <AddArtistForm onArtistAdded={() => {
             fetchDashboardData();
             setActiveTab('artists');
+          }} />
+        )}
+
+        {/* Playlists Tab */}
+        {activeTab === 'playlists' && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 px-6 py-4">
+              <h2 className="text-xl font-semibold text-blue-900">Playlists Management</h2>
+            </div>
+
+            {playlists.map((playlist) => (
+              <div key={playlist._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition">
+                <div className="p-6">
+                  <div className="flex items-start space-x-6">
+                    {/* Playlist Cover */}
+                    <div className="flex-shrink-0">
+                      {playlist.coverImage ? (
+                        <img
+                          src={`http://localhost:5000${playlist.coverImage}`}
+                          alt={playlist.name}
+                          className="w-32 h-32 rounded-lg object-cover shadow-md"
+                        />
+                      ) : (
+                        <div className="w-32 h-32 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-md">
+                          <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Playlist Details */}
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="text-2xl font-bold text-gray-900">{playlist.name}</h3>
+                            {playlist.collaborative && (
+                              <span className="px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded-full">
+                                Collaborative
+                              </span>
+                            )}
+                            {playlist.isPublic ? (
+                              <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                                Public
+                              </span>
+                            ) : (
+                              <span className="px-3 py-1 bg-gray-600 text-white text-xs font-semibold rounded-full">
+                                Private
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Owner & Description */}
+                          <div className="mb-3">
+                            <p className="text-sm text-gray-600">
+                              Owner: <span className="font-medium">{playlist.owner?.username}</span> ({playlist.owner?.email})
+                            </p>
+                            {playlist.description && (
+                              <p className="mt-2 text-gray-700 text-sm">{playlist.description}</p>
+                            )}
+                          </div>
+
+                          {/* Collaborators */}
+                          {playlist.collaborators && playlist.collaborators.length > 0 && (
+                            <div className="mb-3">
+                              <h4 className="text-sm font-semibold text-gray-700 mb-1">Collaborators:</h4>
+                              <div className="flex flex-wrap gap-2">
+                                {playlist.collaborators.map((collab) => (
+                                  <span key={collab._id} className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                    {collab.username}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Metadata Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-1">Songs</p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {playlist.songs?.length || 0}
+                              </p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-1">Duration</p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {Math.floor((playlist.totalDuration || 0) / 60)} min
+                              </p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-1">Followers</p>
+                              <p className="text-sm font-semibold text-gray-900">{playlist.followers?.toLocaleString() || 0}</p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-1">Created</p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {new Date(playlist.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Analytics */}
+                          {(playlist.playCount || playlist.likes || playlist.shares) && (
+                            <div className="mt-4">
+                              <h4 className="text-sm font-semibold text-gray-700 mb-2">Analytics</h4>
+                              <div className="flex flex-wrap gap-2">
+                                {playlist.playCount > 0 && (
+                                  <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs rounded-full">
+                                    Plays: {playlist.playCount.toLocaleString()}
+                                  </span>
+                                )}
+                                {playlist.likes > 0 && (
+                                  <span className="px-3 py-1 bg-red-50 text-red-700 text-xs rounded-full">
+                                    Likes: {playlist.likes.toLocaleString()}
+                                  </span>
+                                )}
+                                {playlist.shares > 0 && (
+                                  <span className="px-3 py-1 bg-green-50 text-green-700 text-xs rounded-full">
+                                    Shares: {playlist.shares.toLocaleString()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Privacy Settings */}
+                          {playlist.privacySettings && (
+                            <div className="mt-4">
+                              <h4 className="text-sm font-semibold text-gray-700 mb-2">Privacy Settings</h4>
+                              <div className="flex flex-wrap gap-2">
+                                <span className={`px-3 py-1 text-xs rounded-full ${playlist.privacySettings.allowDownload ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                  Downloads: {playlist.privacySettings.allowDownload ? 'Allowed' : 'Disabled'}
+                                </span>
+                                <span className={`px-3 py-1 text-xs rounded-full ${playlist.privacySettings.allowComments ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                  Comments: {playlist.privacySettings.allowComments ? 'Allowed' : 'Disabled'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Song List */}
+                          {playlist.songs && playlist.songs.length > 0 && (
+                            <div className="mt-4">
+                              <h4 className="text-sm font-semibold text-gray-700 mb-2">Songs ({playlist.songs.length})</h4>
+                              <div className="bg-gray-50 rounded-lg p-3 max-h-48 overflow-y-auto">
+                                <div className="space-y-2">
+                                  {playlist.songs.map((item, index) => (
+                                    <div key={index} className="flex items-center justify-between text-sm">
+                                      <div className="flex-1">
+                                        <span className="text-gray-900 font-medium">
+                                          {index + 1}. {item.song?.title || 'Unknown'}
+                                        </span>
+                                        <span className="text-gray-600 ml-2">
+                                          - {item.song?.artist?.name || 'Unknown Artist'}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs text-gray-500">
+                                        {item.song?.duration ? `${Math.floor(item.song.duration / 60)}:${(item.song.duration % 60).toString().padStart(2, '0')}` : ''}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex flex-col space-y-2">
+                          <button
+                            onClick={() => handleDeletePlaylist(playlist._id)}
+                            className="px-4 py-2 bg-red-100 text-red-700 font-semibold rounded-lg hover:bg-red-200 transition"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {playlists.length === 0 && (
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-12 text-center">
+                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                </svg>
+                <p className="text-gray-500 text-lg">No playlists found</p>
+                <p className="text-gray-400 text-sm mt-2">Add your first playlist to get started</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Add Playlist Tab */}
+        {activeTab === 'add-playlist' && (
+          <AddPlaylistForm onPlaylistAdded={() => {
+            fetchDashboardData();
+            setActiveTab('playlists');
           }} />
         )}
       </div>
