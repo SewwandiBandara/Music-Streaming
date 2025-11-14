@@ -8,7 +8,7 @@ const Playlist = require('../models/Playlist');
 const router = express.Router();
 
 // Hardcoded admin credentials
-const ADMIN_USERNAME = 'Admin';
+const ADMIN_USERNAME = 'Admin@gmail.com';
 const ADMIN_PASSWORD = 'admin123';
 
 // Admin login
