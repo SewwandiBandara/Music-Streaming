@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,7 +15,7 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
 
-    const result = await login(username, password);
+    const result = await login(email, password);
 
     if (result.success) {
       navigate('/admin/dashboard');
@@ -57,16 +57,16 @@ const AdminLogin = () => {
           )}
 
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
-              Username
+            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              Email
             </label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="Enter admin username"
+              placeholder="Enter admin email"
               required
             />
           </div>
