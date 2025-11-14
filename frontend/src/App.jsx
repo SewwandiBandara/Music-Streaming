@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import { AuthProvider } from './context/AuthContext';
+import { AdminProvider } from './context/AdminContext';
 import Navbar from './components/Navbar';
 import AudioPlayer from './components/AudioPlayer';
 import Home from './pages/Home';
@@ -44,9 +45,8 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50 pb-24">
-          <Navbar />
+      <AdminProvider>
+        <Router>
           <Routes>
             <Route path="/" element={<Home onPlaySong={handlePlaySong} />} />
             <Route path="/browse" element={<Browse onPlaySong={handlePlaySong} />} />
@@ -57,14 +57,8 @@ function App() {
             <Route path="/signin" element={<Signin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <AudioPlayer
-            currentSong={currentSong}
-            playlist={playlist}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-          />
-        </div>
-      </Router>
+        </Router>
+      </AdminProvider>
     </AuthProvider>
   );
 }

@@ -44,22 +44,20 @@ const Signin = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signin', {
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
         email,
         password
       });
 
-      if (response.data.success) {
-        // Store token in localStorage
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Store token in localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
 
-        // Redirect to profile/dashboard
-        navigate('/profile');
-      }
+      // Redirect to home/dashboard
+      navigate('/profile');
     } catch (err) {
       setError(
-        err.response?.data?.message || 'Login failed. Please try again.'
+        err.response?.data?.error || err.response?.data?.message || 'Login failed. Please try again.'
       );
     } finally {
       setLoading(false);

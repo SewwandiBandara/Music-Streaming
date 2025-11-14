@@ -8,6 +8,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -15,7 +16,7 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { username, email, password, confirmPassword } = formData;
+  const { username, name, email, password, confirmPassword } = formData;
 
   const handleChange = (e) => {
     setFormData({
@@ -30,7 +31,7 @@ const Signup = () => {
     setError('');
 
     // Validation
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !name || !email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
     }
@@ -53,23 +54,22 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', {
+      const response = await axios.post('http://localhost:5000/api/auth/register', {
         username,
+        name,
         email,
         password
       });
 
-      if (response.data.success) {
-        // Store token in localStorage
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Store token in localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
 
-        // Redirect to profile/dashboard
-        navigate('/signin');
-      }
+      // Redirect to profile/dashboard
+      navigate('/signin');
     } catch (err) {
       setError(
-        err.response?.data?.message || 'Registration failed. Please try again.'
+        err.response?.data?.error || err.response?.data?.message || 'Registration failed. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -104,6 +104,21 @@ const Signup = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 placeholder={t('Choose a username')}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-slate-200 mb-2">
+                {t('Full Name')}
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={name}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-slate-800/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder={t('Enter your full name')}
               />
             </div>
 

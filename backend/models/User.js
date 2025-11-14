@@ -2,6 +2,13 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    minlength: 3
+  },
   name: {
     type: String,
     required: true,
@@ -20,9 +27,23 @@ const userSchema = new mongoose.Schema({
     minlength: 6
   },
   subscription: {
-    type: String,
-    enum: ['free', 'premium', 'family'],
-    default: 'free'
+    type: {
+      type: String,
+      enum: ['free', 'premium', 'family'],
+      default: 'free'
+    },
+    startDate: {
+      type: Date,
+      default: Date.now
+    },
+    endDate: {
+      type: Date,
+      default: null
+    },
+    autoRenew: {
+      type: Boolean,
+      default: false
+    }
   },
   profilePicture: {
     type: String,
@@ -41,6 +62,15 @@ const userSchema = new mongoose.Schema({
     explicitContent: {
       type: Boolean,
       default: true
+    },
+    autoplay: {
+      type: Boolean,
+      default: true
+    },
+    downloadQuality: {
+      type: String,
+      enum: ['low', 'normal', 'high', 'very_high'],
+      default: 'normal'
     }
   },
   likedSongs: [{
@@ -51,6 +81,18 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Artist'
   }],
+  playlists: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Playlist'
+  }],
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

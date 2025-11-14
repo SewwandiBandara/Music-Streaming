@@ -27,6 +27,7 @@ const songRoutes = require('./routes/songs');
 const playlistRoutes = require('./routes/playlists');
 const artistRoutes = require('./routes/artists');
 const searchRoutes = require('./routes/search');
+const adminRoutes = require('./routes/admin');
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -34,6 +35,7 @@ app.use('/api/songs', songRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/artists', artistRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
