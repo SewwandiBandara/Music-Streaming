@@ -1,36 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 
 const Home = () => {
   const { t } = useTranslation();
+  const [popularArtists, setPopularArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [trendingSongs, setTrendingSongs] = useState([]);
+  const [songsLoading, setSongsLoading] = useState(true);
 
-  const trendingSongs = [
-    { title: 'Blinding Lights', artist: 'The Weeknd', album: 'After Hours' },
-    { title: 'Shape of You', artist: 'Ed Sheeran', album: 'Divide' },
-    { title: 'Someone Like You', artist: 'Adele', album: '21' },
-    { title: 'Levitating', artist: 'Dua Lipa', album: 'Future Nostalgia' },
-    { title: 'Starboy', artist: 'The Weeknd', album: 'Starboy' },
-    { title: 'Perfect', artist: 'Ed Sheeran', album: 'Divide' },
-    { title: 'Rolling in the Deep', artist: 'Adele', album: '21' },
-    { title: 'Bad Guy', artist: 'Billie Eilish', album: 'When We All Fall Asleep' },
-    { title: 'Uptown Funk', artist: 'Bruno Mars', album: 'Uptown Special' },
-    { title: 'Believer', artist: 'Imagine Dragons', album: 'Evolve' },
-  ];
+  useEffect(() => {
+    fetchPopularArtists();
+    fetchTrendingSongs();
+  }, []);
 
-  const popularArtists = [
-    { name: 'Taylor Swift', genre: 'Pop', followers: '90M+' },
-    { name: 'Drake', genre: 'Hip Hop', followers: '85M+' },
-    { name: 'The Weeknd', genre: 'R&B', followers: '80M+' },
-    { name: 'Ed Sheeran', genre: 'Pop', followers: '75M+' },
-    { name: 'Ariana Grande', genre: 'Pop', followers: '70M+' },
-    { name: 'Billie Eilish', genre: 'Alternative', followers: '65M+' },
-    { name: 'Post Malone', genre: 'Hip Hop', followers: '60M+' },
-    { name: 'Dua Lipa', genre: 'Pop', followers: '55M+' },
-    { name: 'Justin Bieber', genre: 'Pop', followers: '88M+' },
-    { name: 'Bad Bunny', genre: 'Latin', followers: '72M+' },
-  ];
+  const fetchPopularArtists = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/artists', {
+        params: { limit: 10 }
+      });
+      setPopularArtists(response.data.artists);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching artists:', error);
+      setLoading(false);
+    }
+  };
+
+  const fetchTrendingSongs = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/songs/trending/top', {
+        params: { limit: 10 }
+      });
+      setTrendingSongs(response.data);
+      setSongsLoading(false);
+    } catch (error) {
+      console.error('Error fetching trending songs:', error);
+      setSongsLoading(false);
+    }
+  };
+
+  const formatFollowers = (count) => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M+`;
+    } else if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K+`;
+    }
+    return count.toString();
+  };
+
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
@@ -103,40 +128,128 @@ const Home = () => {
               View All →
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            {trendingSongs.map((song, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition-shadow duration-200 border border-gray-200">
-                <div className="w-full aspect-square bg-gradient-to-br from-blue-800 to-blue-900 rounded-lg mb-3 flex items-center justify-center">
-                  <svg className="w-12 h-12 text-white opacity-80" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
-                  </svg>
+          {songsLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+              <p className="mt-4 text-gray-600">Loading songs...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              {trendingSongs.map((song, index) => (
+                <div key={song._id || index} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 border border-gray-200 overflow-hidden">
+                  {/* Cover Image */}
+                  {song.coverImage ? (
+                    <div className="w-full aspect-square overflow-hidden">
+                      <img
+                        src={`http://localhost:5000${song.coverImage}`}
+                        alt={song.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-square bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center">
+                      <svg className="w-12 h-12 text-white opacity-80" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                      </svg>
+                    </div>
+                  )}
+
+                  {/* Song Details */}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 truncate flex-1">{song.title}</h3>
+                      {song.explicit && (
+                        <span className="ml-2 px-1.5 py-0.5 bg-red-600 text-white text-xs font-bold rounded">E</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 truncate mb-1">
+                      {song.artist?.name || 'Unknown Artist'}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate mb-2">{song.genre}</p>
+
+                    {/* Metadata */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-gray-200">
+                      <span>{formatDuration(song.duration)}</span>
+                      <span>{song.playCount?.toLocaleString() || 0} plays</span>
+                    </div>
+
+                    {/* Audio Features */}
+                    {song.features && (song.features.tempo || song.features.mood) && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {song.features.tempo && (
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
+                            {song.features.tempo} BPM
+                          </span>
+                        )}
+                        {song.features.mood && (
+                          <span className="px-2 py-0.5 bg-purple-50 text-purple-700 text-xs rounded capitalize">
+                            {song.features.mood}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1 truncate">{song.title}</h3>
-                <p className="text-sm text-gray-600 truncate">{song.artist}</p>
-                <p className="text-xs text-gray-500 truncate">{song.album}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+          {!songsLoading && trendingSongs.length === 0 && (
+            <div className="text-center py-12 bg-white rounded-lg shadow-md">
+              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+              </svg>
+              <p className="text-gray-500 text-lg">No songs available yet</p>
+            </div>
+          )}
         </div>
 
         {/* Popular Artists Section */}
         <div className="mt-24">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-blue-900">⭐ Popular Artists</h2>
-            <Link to="/browse" className="text-blue-900 font-semibold hover:text-blue-700">
+            <Link to="/profile" className="text-blue-900 font-semibold hover:text-blue-700">
               View All →
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {popularArtists.map((artist, index) => (
-              <div key={index} className="text-center">
-                <div className="w-full aspect-square bg-gradient-to-br from-blue-600 to-blue-900 rounded-full mb-3 cursor-pointer hover:scale-105 transition-transform shadow-lg"></div>
-                <h3 className="font-semibold text-gray-900 mb-1 truncate">{artist.name}</h3>
-                <p className="text-sm text-gray-600">{artist.genre}</p>
-                <p className="text-xs text-blue-600 font-medium">{artist.followers} followers</p>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+              <p className="mt-4 text-gray-600">Loading artists...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {popularArtists.map((artist, index) => (
+                <div key={artist._id || index} className="text-center">
+                  {artist.image ? (
+                    <div className="w-full aspect-square rounded-full mb-3 cursor-pointer hover:scale-105 transition-transform shadow-lg overflow-hidden">
+                      <img
+                        src={`http://localhost:5000${artist.image}`}
+                        alt={artist.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-square bg-gradient-to-br from-blue-600 to-blue-900 rounded-full mb-3 cursor-pointer hover:scale-105 transition-transform shadow-lg flex items-center justify-center">
+                      <svg className="w-1/2 h-1/2 text-white opacity-80" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-gray-900 mb-1 truncate">{artist.name}</h3>
+                  <p className="text-sm text-gray-600">{artist.genres && artist.genres.length > 0 ? artist.genres[0] : 'Artist'}</p>
+                  <p className="text-xs text-blue-600 font-medium">{formatFollowers(artist.followers || 0)} followers</p>
+                </div>
+              ))}
+            </div>
+          )}
+          {!loading && popularArtists.length === 0 && (
+            <div className="text-center py-12 bg-white rounded-lg shadow-md">
+              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <p className="text-gray-500 text-lg">No artists found</p>
+            </div>
+          )}
         </div>
 
         {/* CTA Section */}

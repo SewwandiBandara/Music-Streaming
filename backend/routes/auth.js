@@ -96,9 +96,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    // Update last login using findByIdAndUpdate to avoid triggering password hash middleware
+    await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
     // Generate JWT token
     const token = jwt.sign(

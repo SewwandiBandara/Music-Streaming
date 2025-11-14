@@ -1,11 +1,54 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
 const User = require('../models/User');
 const Song = require('../models/Song');
 const Artist = require('../models/Artist');
 const Playlist = require('../models/Playlist');
 
 const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'audioFile') {
+      cb(null, path.join(__dirname, '../uploads/songs'));
+    } else if (file.fieldname === 'coverImage') {
+      cb(null, path.join(__dirname, '../uploads/covers'));
+    } else if (file.fieldname === 'artistImage') {
+      cb(null, path.join(__dirname, '../uploads/artists'));
+    }
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === 'audioFile') {
+      if (file.mimetype.startsWith('audio/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only audio files are allowed for song upload'));
+      }
+    } else if (file.fieldname === 'coverImage' || file.fieldname === 'artistImage') {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'));
+      }
+    } else {
+      cb(null, true);
+    }
+  }
+});
 
 // Hardcoded admin credentials
 const ADMIN_EMAIL = 'Admin@gmail.com';
@@ -420,7 +463,6 @@ router.get('/artists', adminAuth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const artists = await Artist.find()
-      .select('name bio isVerified createdAt')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -496,6 +538,265 @@ router.patch('/artists/:id/verify', adminAuth, async (req, res) => {
   } catch (error) {
     console.error('Error verifying artist:', error);
     res.status(500).json({ message: 'Error verifying artist' });
+  }
+});
+
+// Add new song with file upload
+router.post('/songs', adminAuth, upload.fields([
+  { name: 'audioFile', maxCount: 1 },
+  { name: 'coverImage', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const {
+      title,
+      artistId,
+      albumId,
+      genre,
+      duration,
+      releaseDate,
+      lyrics,
+      explicit,
+      bitrate,
+      // Audio features
+      tempo,
+      key,
+      mood,
+      energy,
+      danceability
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !artistId || !genre || !duration || !releaseDate) {
+      return res.status(400).json({
+        message: 'Missing required fields: title, artistId, genre, duration, releaseDate'
+      });
+    }
+
+    // Check if audio file was uploaded
+    if (!req.files || !req.files.audioFile || !req.files.audioFile[0]) {
+      return res.status(400).json({ message: 'Audio file is required' });
+    }
+
+    // Check if artist exists
+    const artist = await Artist.findById(artistId);
+    if (!artist) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+
+    const audioFile = req.files.audioFile[0];
+    const coverImage = req.files.coverImage ? req.files.coverImage[0] : null;
+
+    // Get file extension to determine format
+    const format = path.extname(audioFile.originalname).slice(1).toLowerCase();
+
+    // Create song object
+    const songData = {
+      title,
+      artist: artistId,
+      album: albumId || null,
+      genre,
+      duration: parseInt(duration),
+      releaseDate: new Date(releaseDate),
+      fileUrl: `/uploads/songs/${audioFile.filename}`,
+      fileName: audioFile.filename,
+      fileSize: audioFile.size,
+      format: format,
+      bitrate: bitrate ? parseInt(bitrate) : 320,
+      coverImage: coverImage ? `/uploads/covers/${coverImage.filename}` : null,
+      lyrics: lyrics || '',
+      explicit: explicit === 'true' || explicit === true,
+      features: {
+        tempo: tempo ? parseFloat(tempo) : undefined,
+        key: key || undefined,
+        mood: mood || undefined,
+        energy: energy ? parseFloat(energy) : undefined,
+        danceability: danceability ? parseFloat(danceability) : undefined
+      }
+    };
+
+    const song = new Song(songData);
+    await song.save();
+
+    // Populate artist info before sending response
+    await song.populate('artist', 'name');
+
+    res.status(201).json({
+      message: 'Song uploaded successfully',
+      song
+    });
+  } catch (error) {
+    console.error('Error uploading song:', error);
+    res.status(500).json({
+      message: 'Error uploading song',
+      error: error.message
+    });
+  }
+});
+
+// Get all artists (for dropdown in add song form)
+router.get('/artists/list', adminAuth, async (req, res) => {
+  try {
+    const artists = await Artist.find().select('name _id').sort({ name: 1 });
+    res.json({ artists });
+  } catch (error) {
+    console.error('Error fetching artists list:', error);
+    res.status(500).json({ message: 'Error fetching artists' });
+  }
+});
+
+// Add new artist with image upload
+router.post('/artists', adminAuth, upload.fields([
+  { name: 'artistImage', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const {
+      name,
+      bio,
+      genres,
+      monthlyListeners,
+      followers,
+      instagram,
+      twitter,
+      facebook,
+      website
+    } = req.body;
+
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({
+        message: 'Artist name is required'
+      });
+    }
+
+    // Check if artist already exists
+    const existingArtist = await Artist.findOne({ name });
+    if (existingArtist) {
+      return res.status(400).json({ message: 'Artist with this name already exists' });
+    }
+
+    const artistImage = req.files && req.files.artistImage ? req.files.artistImage[0] : null;
+
+    // Parse genres if it's a string (from form data)
+    let genresArray = [];
+    if (genres) {
+      if (typeof genres === 'string') {
+        genresArray = genres.split(',').map(g => g.trim()).filter(g => g);
+      } else if (Array.isArray(genres)) {
+        genresArray = genres;
+      }
+    }
+
+    // Create artist object
+    const artistData = {
+      name,
+      bio: bio || '',
+      image: artistImage ? `/uploads/artists/${artistImage.filename}` : null,
+      genres: genresArray,
+      monthlyListeners: monthlyListeners ? parseInt(monthlyListeners) : 0,
+      followers: followers ? parseInt(followers) : 0,
+      socialLinks: {
+        instagram: instagram || '',
+        twitter: twitter || '',
+        facebook: facebook || '',
+        website: website || ''
+      }
+    };
+
+    const artist = new Artist(artistData);
+    await artist.save();
+
+    res.status(201).json({
+      message: 'Artist created successfully',
+      artist
+    });
+  } catch (error) {
+    console.error('Error creating artist:', error);
+    res.status(500).json({
+      message: 'Error creating artist',
+      error: error.message
+    });
+  }
+});
+
+// Update artist
+router.patch('/artists/:id', adminAuth, upload.fields([
+  { name: 'artistImage', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const {
+      name,
+      bio,
+      genres,
+      monthlyListeners,
+      followers,
+      instagram,
+      twitter,
+      facebook,
+      website
+    } = req.body;
+
+    const artist = await Artist.findById(req.params.id);
+    if (!artist) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+
+    // Update fields if provided
+    if (name) artist.name = name;
+    if (bio !== undefined) artist.bio = bio;
+
+    // Parse genres if provided
+    if (genres !== undefined) {
+      if (typeof genres === 'string') {
+        artist.genres = genres.split(',').map(g => g.trim()).filter(g => g);
+      } else if (Array.isArray(genres)) {
+        artist.genres = genres;
+      }
+    }
+
+    if (monthlyListeners !== undefined) artist.monthlyListeners = parseInt(monthlyListeners);
+    if (followers !== undefined) artist.followers = parseInt(followers);
+
+    // Update image if uploaded
+    const artistImage = req.files && req.files.artistImage ? req.files.artistImage[0] : null;
+    if (artistImage) {
+      artist.image = `/uploads/artists/${artistImage.filename}`;
+    }
+
+    // Update social links
+    if (instagram !== undefined) artist.socialLinks.instagram = instagram;
+    if (twitter !== undefined) artist.socialLinks.twitter = twitter;
+    if (facebook !== undefined) artist.socialLinks.facebook = facebook;
+    if (website !== undefined) artist.socialLinks.website = website;
+
+    await artist.save();
+
+    res.json({
+      message: 'Artist updated successfully',
+      artist
+    });
+  } catch (error) {
+    console.error('Error updating artist:', error);
+    res.status(500).json({
+      message: 'Error updating artist',
+      error: error.message
+    });
+  }
+});
+
+// Delete artist
+router.delete('/artists/:id', adminAuth, async (req, res) => {
+  try {
+    const artist = await Artist.findByIdAndDelete(req.params.id);
+
+    if (!artist) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+
+    // Note: You might want to handle related songs here
+    res.json({ message: 'Artist deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting artist:', error);
+    res.status(500).json({ message: 'Error deleting artist' });
   }
 });
 
