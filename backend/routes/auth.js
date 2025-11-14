@@ -8,11 +8,15 @@ const router = express.Router();
 // Register a new user
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { username, name, email, password } = req.body;
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!username || !name || !email || !password) {
       return res.status(400).json({ error: 'Please provide all required fields' });
+    }
+
+    if (username.length < 3) {
+      return res.status(400).json({ error: 'Username must be at least 3 characters' });
     }
 
     if (password.length < 6) {
@@ -20,13 +24,29 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return res.status(400).json({ error: 'User already exists with this email' });
     }
 
-    // Create new user
-    const user = new User({ name, email, password });
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ error: 'Username is already taken' });
+    }
+
+    // Create new user with default subscription
+    const user = new User({
+      username,
+      name,
+      email,
+      password,
+      subscription: {
+        type: 'free',
+        startDate: new Date(),
+        endDate: null,
+        autoRenew: false
+      }
+    });
     await user.save();
 
     // Generate JWT token
@@ -41,9 +61,11 @@ router.post('/register', async (req, res) => {
       token,
       user: {
         id: user._id,
+        username: user.username,
         name: user.name,
         email: user.email,
-        subscription: user.subscription
+        subscription: user.subscription.type,
+        preferences: user.preferences
       }
     });
   } catch (error) {
@@ -90,10 +112,13 @@ router.post('/login', async (req, res) => {
       token,
       user: {
         id: user._id,
+        username: user.username,
         name: user.name,
         email: user.email,
-        subscription: user.subscription,
-        profilePicture: user.profilePicture
+        subscription: user.subscription.type,
+        profilePicture: user.profilePicture,
+        preferences: user.preferences,
+        isVerified: user.isVerified
       }
     });
   } catch (error) {
