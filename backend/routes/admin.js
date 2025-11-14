@@ -120,10 +120,19 @@ router.get('/stats', adminAuth, async (req, res) => {
       Playlist.countDocuments()
     ]);
 
-    // Get subscription breakdown
-    const freeUsers = await User.countDocuments({ 'subscription.type': 'free' });
-    const premiumUsers = await User.countDocuments({ 'subscription.type': 'premium' });
-    const familyUsers = await User.countDocuments({ 'subscription.type': 'family' });
+    // Get subscription breakdown - handle both string and object subscription types
+    const allUsers = await User.find({}).select('subscription');
+    let freeUsers = 0, premiumUsers = 0, familyUsers = 0;
+
+    allUsers.forEach(user => {
+      const subType = typeof user.subscription === 'string'
+        ? user.subscription
+        : (user.subscription?.type || 'free');
+
+      if (subType === 'free') freeUsers++;
+      else if (subType === 'premium') premiumUsers++;
+      else if (subType === 'family') familyUsers++;
+    });
 
     // Get active/inactive users
     const activeUsers = await User.countDocuments({ isActive: true });
@@ -166,7 +175,7 @@ router.get('/stats', adminAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);
-    res.status(500).json({ message: 'Error fetching statistics' });
+    res.status(500).json({ message: 'Error fetching statistics', error: error.message });
   }
 });
 
