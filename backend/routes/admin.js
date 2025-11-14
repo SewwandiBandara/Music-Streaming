@@ -508,4 +508,233 @@ router.patch('/artists/:id/verify', adminAuth, async (req, res) => {
   }
 });
 
+// ===== PLAYLIST MANAGEMENT =====
+
+// Get all playlists with pagination
+router.get('/playlists', adminAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const playlists = await Playlist.find()
+      .select('name description owner isPublic songs createdAt')
+      .populate('owner', 'username email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Playlist.countDocuments();
+
+    // Add song count for each playlist
+    const playlistsWithCount = playlists.map(playlist => ({
+      _id: playlist._id,
+      name: playlist.name,
+      description: playlist.description,
+      owner: playlist.owner,
+      isPublic: playlist.isPublic,
+      songCount: playlist.songs.length,
+      createdAt: playlist.createdAt
+    }));
+
+    res.json({
+      playlists: playlistsWithCount,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching playlists:', error);
+    res.status(500).json({ message: 'Error fetching playlists' });
+  }
+});
+
+// Get single playlist details
+router.get('/playlists/:id', adminAuth, async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id)
+      .populate('owner', 'username email')
+      .populate({
+        path: 'songs.song',
+        select: 'title artist duration',
+        populate: {
+          path: 'artist',
+          select: 'name'
+        }
+      });
+
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    res.json({ playlist });
+  } catch (error) {
+    console.error('Error fetching playlist:', error);
+    res.status(500).json({ message: 'Error fetching playlist details' });
+  }
+});
+
+// Create a new playlist (admin creates for any user)
+router.post('/playlists', adminAuth, async (req, res) => {
+  try {
+    const { name, description, ownerId, isPublic, coverImage } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: 'Playlist name is required' });
+    }
+
+    if (!ownerId) {
+      return res.status(400).json({ message: 'Owner ID is required' });
+    }
+
+    // Verify owner exists
+    const owner = await User.findById(ownerId);
+    if (!owner) {
+      return res.status(404).json({ message: 'Owner user not found' });
+    }
+
+    const playlist = new Playlist({
+      name,
+      description: description || '',
+      owner: ownerId,
+      isPublic: isPublic !== undefined ? isPublic : true,
+      coverImage: coverImage || null
+    });
+
+    await playlist.save();
+    await playlist.populate('owner', 'username email');
+
+    res.status(201).json({
+      message: 'Playlist created successfully',
+      playlist
+    });
+  } catch (error) {
+    console.error('Error creating playlist:', error);
+    res.status(500).json({ message: 'Error creating playlist' });
+  }
+});
+
+// Update playlist
+router.patch('/playlists/:id', adminAuth, async (req, res) => {
+  try {
+    const { name, description, isPublic, coverImage } = req.body;
+
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    if (name) playlist.name = name;
+    if (description !== undefined) playlist.description = description;
+    if (isPublic !== undefined) playlist.isPublic = isPublic;
+    if (coverImage !== undefined) playlist.coverImage = coverImage;
+
+    await playlist.save();
+    await playlist.populate('owner', 'username email');
+
+    res.json({
+      message: 'Playlist updated successfully',
+      playlist
+    });
+  } catch (error) {
+    console.error('Error updating playlist:', error);
+    res.status(500).json({ message: 'Error updating playlist' });
+  }
+});
+
+// Delete playlist
+router.delete('/playlists/:id', adminAuth, async (req, res) => {
+  try {
+    const playlist = await Playlist.findByIdAndDelete(req.params.id);
+
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    res.json({ message: 'Playlist deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting playlist:', error);
+    res.status(500).json({ message: 'Error deleting playlist' });
+  }
+});
+
+// Add song to playlist
+router.post('/playlists/:id/songs', adminAuth, async (req, res) => {
+  try {
+    const { songId } = req.body;
+
+    if (!songId) {
+      return res.status(400).json({ message: 'Song ID is required' });
+    }
+
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    // Check if song exists
+    const song = await Song.findById(songId);
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
+
+    // Check if song is already in playlist
+    const songExists = playlist.songs.some(item => item.song.toString() === songId);
+    if (songExists) {
+      return res.status(400).json({ message: 'Song already in playlist' });
+    }
+
+    // Add song to playlist
+    playlist.songs.push({
+      song: songId,
+      addedAt: new Date()
+    });
+
+    await playlist.updateTotalDuration();
+    await playlist.populate({
+      path: 'songs.song',
+      select: 'title artist duration',
+      populate: {
+        path: 'artist',
+        select: 'name'
+      }
+    });
+
+    res.json({
+      message: 'Song added to playlist',
+      playlist
+    });
+  } catch (error) {
+    console.error('Error adding song to playlist:', error);
+    res.status(500).json({ message: 'Error adding song to playlist' });
+  }
+});
+
+// Remove song from playlist
+router.delete('/playlists/:id/songs/:songId', adminAuth, async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+
+    // Remove song
+    playlist.songs = playlist.songs.filter(
+      item => item.song.toString() !== req.params.songId
+    );
+
+    await playlist.updateTotalDuration();
+
+    res.json({
+      message: 'Song removed from playlist',
+      playlist
+    });
+  } catch (error) {
+    console.error('Error removing song from playlist:', error);
+    res.status(500).json({ message: 'Error removing song from playlist' });
+  }
+});
+
 module.exports = router;

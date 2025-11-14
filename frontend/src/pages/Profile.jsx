@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 const Profile = () => {
   const { t } = useTranslation();
@@ -10,6 +11,9 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('favorites');
   const [discoverTab, setDiscoverTab] = useState('all-songs');
   const [searchQuery, setSearchQuery] = useState('');
+  const [myPlaylists, setMyPlaylists] = useState([]);
+  const [allPlaylists, setAllPlaylists] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -23,6 +27,47 @@ const Profile = () => {
 
     setUser(JSON.parse(userData));
   }, [navigate]);
+
+  // Fetch user's playlists when My Content > Playlists tab is active
+  useEffect(() => {
+    if (activeSection === 'my-content' && activeTab === 'playlists') {
+      fetchMyPlaylists();
+    }
+  }, [activeSection, activeTab]);
+
+  // Fetch all public playlists when Discover > All Playlists tab is active
+  useEffect(() => {
+    if (activeSection === 'discover' && discoverTab === 'all-playlists') {
+      fetchAllPlaylists();
+    }
+  }, [activeSection, discoverTab]);
+
+  const fetchMyPlaylists = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/playlists/my-playlists', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMyPlaylists(response.data);
+    } catch (error) {
+      console.error('Error fetching my playlists:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllPlaylists = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/api/playlists?limit=20');
+      setAllPlaylists(response.data.playlists || []);
+    } catch (error) {
+      console.error('Error fetching all playlists:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -76,18 +121,6 @@ const Profile = () => {
     { title: 'Fine Line', artist: 'Harry Styles', year: '2019' },
   ];
 
-  const allPlaylists = [
-    { name: 'Today\'s Top Hits', count: 50, description: 'The biggest songs right now' },
-    { name: 'Chill Vibes', count: 35, description: 'Relax and unwind' },
-    { name: 'Workout Beats', count: 45, description: 'High energy music' },
-    { name: 'Study Focus', count: 30, description: 'Concentration music' },
-    { name: 'Party Anthems', count: 60, description: 'Get the party started' },
-    { name: 'Classic Rock', count: 40, description: 'Timeless rock hits' },
-    { name: 'R&B Soul', count: 38, description: 'Smooth R&B tracks' },
-    { name: 'Pop Hits 2024', count: 55, description: 'Latest pop sensations' },
-    { name: 'Indie Favorites', count: 42, description: 'Best indie tracks' },
-    { name: 'Electronic Dance', count: 48, description: 'EDM essentials' },
-  ];
 
   const allArtists = [
     { name: 'Taylor Swift', genre: 'Pop', followers: '90M+' },
@@ -178,7 +211,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">{t('My Playlists')}</p>
-                    <p className="text-3xl font-bold text-blue-800">0</p>
+                    <p className="text-3xl font-bold text-blue-800">{myPlaylists.length}</p>
                   </div>
                   <div className="text-4xl">🎵</div>
                 </div>
@@ -243,18 +276,52 @@ const Profile = () => {
                 )}
 
                 {activeTab === 'playlists' && (
-                  <div className="text-center py-16">
-                    <div className="text-6xl mb-4">🎵</div>
-                    <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Playlists Yet</h3>
-                    <p className="text-gray-600 mb-6">
-                      Create your first playlist to organize your favorite music
-                    </p>
-                    <button
-                      onClick={() => navigate('/playlists')}
-                      className="px-6 py-3 bg-blue-900 text-white font-semibold rounded-full hover:bg-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg"
-                    >
-                      Create Playlist
-                    </button>
+                  <div>
+                    {loading ? (
+                      <div className="text-center py-16">
+                        <div className="text-gray-600">Loading playlists...</div>
+                      </div>
+                    ) : myPlaylists.length === 0 ? (
+                      <div className="text-center py-16">
+                        <div className="text-6xl mb-4">🎵</div>
+                        <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Playlists Yet</h3>
+                        <p className="text-gray-600 mb-6">
+                          Create your first playlist to organize your favorite music
+                        </p>
+                        <button
+                          onClick={() => navigate('/playlists')}
+                          className="px-6 py-3 bg-blue-900 text-white font-semibold rounded-full hover:bg-blue-800 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                        >
+                          Create Playlist
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {myPlaylists.map((playlist) => (
+                          <div key={playlist._id} className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-20 h-20 bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg flex items-center justify-center">
+                                <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-900 mb-1">{playlist.name}</h3>
+                                {playlist.description && (
+                                  <p className="text-xs text-gray-500 mb-1 line-clamp-2">{playlist.description}</p>
+                                )}
+                                <p className="text-sm text-gray-600">{playlist.songs.length} {t('songs')}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button className="flex-1 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
+                                View Playlist
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -388,26 +455,43 @@ const Profile = () => {
                 )}
 
                 {discoverTab === 'all-playlists' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {allPlaylists.map((playlist, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200">
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="w-20 h-20 bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg flex items-center justify-center">
-                            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
-                            </svg>
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-1">{playlist.name}</h3>
-                            <p className="text-xs text-gray-500 mb-1">{playlist.description}</p>
-                            <p className="text-sm text-gray-600">{playlist.count} {t('songs')}</p>
-                          </div>
-                        </div>
-                        <button className="w-full py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
-                          Follow Playlist
-                        </button>
+                  <div>
+                    {loading ? (
+                      <div className="text-center py-16">
+                        <div className="text-gray-600">Loading playlists...</div>
                       </div>
-                    ))}
+                    ) : allPlaylists.length === 0 ? (
+                      <div className="text-center py-16">
+                        <div className="text-6xl mb-4">📝</div>
+                        <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Playlists Available</h3>
+                        <p className="text-gray-600">Check back later for new playlists</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {allPlaylists.map((playlist) => (
+                          <div key={playlist._id} className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200">
+                            <div className="flex items-center space-x-4 mb-4">
+                              <div className="w-20 h-20 bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg flex items-center justify-center">
+                                <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-900 mb-1">{playlist.name}</h3>
+                                {playlist.description && (
+                                  <p className="text-xs text-gray-500 mb-1 line-clamp-2">{playlist.description}</p>
+                                )}
+                                <p className="text-sm text-gray-600">{playlist.songs?.length || 0} {t('songs')}</p>
+                                <p className="text-xs text-gray-500">by {playlist.owner?.name || 'Unknown'}</p>
+                              </div>
+                            </div>
+                            <button className="w-full py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
+                              View Playlist
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
