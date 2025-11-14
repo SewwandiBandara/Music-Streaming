@@ -8,23 +8,23 @@ const Playlist = require('../models/Playlist');
 const router = express.Router();
 
 // Hardcoded admin credentials
-const ADMIN_USERNAME = 'Admin';
+const ADMIN_EMAIL = 'Admin@gmail.com';
 const ADMIN_PASSWORD = 'admin123';
 
 // Admin login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     // Check hardcoded credentials
-    if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
       return res.status(401).json({ message: 'Invalid admin credentials' });
     }
 
     // Generate JWT token for admin
     const token = jwt.sign(
       {
-        username: ADMIN_USERNAME,
+        email: ADMIN_EMAIL,
         role: 'admin',
         isAdmin: true
       },
@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
     res.json({
       token,
       admin: {
-        username: ADMIN_USERNAME,
+        email: ADMIN_EMAIL,
         role: 'admin'
       }
     });
@@ -56,7 +56,7 @@ const adminAuth = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!decoded.isAdmin || decoded.username !== ADMIN_USERNAME) {
+    if (!decoded.isAdmin || decoded.email !== ADMIN_EMAIL) {
       return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
 

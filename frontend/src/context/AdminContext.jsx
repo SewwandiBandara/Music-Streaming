@@ -25,7 +25,7 @@ export const AdminProvider = ({ children }) => {
             headers: { Authorization: `Bearer ${token}` }
           });
           // If request succeeds, token is valid
-          setAdmin({ username: 'Admin', role: 'admin' });
+          setAdmin({ email: 'Admin@gmail.com', role: 'admin' });
         } catch (error) {
           console.error('Token verification failed:', error);
           localStorage.removeItem('adminToken');
@@ -41,10 +41,10 @@ export const AdminProvider = ({ children }) => {
     }
   }, [token]);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     try {
       const response = await axios.post('http://localhost:5000/api/admin/login', {
-        username,
+        email,
         password
       });
 
